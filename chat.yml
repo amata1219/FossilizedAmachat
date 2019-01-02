@@ -1,0 +1,11 @@
+Version: '1.0'
+Chat: true
+Format:
+  Normal: '[player]: [message]'
+  Japanize: '[player]: [japanized]([original])'
+  Translation: '[player]: [translation]([original])'
+Processors: []
+Bots: []
+Players: []
+MutedPlayers: []
+BannedPlayers: []
