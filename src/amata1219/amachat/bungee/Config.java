@@ -4,9 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import com.google.common.io.ByteStreams;
@@ -108,16 +108,15 @@ public class Config{
 		return UUID.fromString(config.getString(path, (def instanceof String) ? (String) def : ""));
 	}
 
-	public List<UUID> getUniqueIdList(String path) {
-		List<?> list = config.getList(path);
-		List<UUID> result = new ArrayList<>();
+	public Set<UUID> getUniqueIdSet(String path) {
+		Set<?> set = new HashSet<>(config.getList(path));
+		Set<UUID> result = new HashSet<>();
 
-		for (Iterator<?> localIterator = list.iterator(); localIterator.hasNext();){
+		for(Iterator<?> localIterator = set.iterator(); localIterator.hasNext();){
 			Object object = localIterator.next();
 
-			if (object instanceof String) {
+			if(object instanceof String)
 				result.add(UUID.fromString((String) object));
-			}
 		}
 
 		return result;

@@ -7,7 +7,6 @@ import com.google.common.io.ByteStreams;
 
 import amata1219.amachat.MessageChannel;
 import amata1219.amachat.chat.Chat;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -45,10 +44,14 @@ public class Amachat extends Plugin implements Listener {
 
 		channel.read(in);
 		UUID uuid = UUID.fromString(channel.getMessage());
+
 		Player player = PlayerManager.getInstance().getPlayer(uuid);
 		Chat chat = player.getAddress();
+		if(chat == null)
+			return;
 
 		channel.read(in);
+		chat.chat(player, channel.getMessage());
 	}
 
 	public void registerIChat(Chat iChat){

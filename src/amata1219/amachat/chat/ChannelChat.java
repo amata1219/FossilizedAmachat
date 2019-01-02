@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import amata1219.amachat.bungee.Player;
 
-public class ChannelChat implements Id {
+public class ChannelChat implements Chat, Id {
 
 	public static final String NAME = "ChannelChat";
 

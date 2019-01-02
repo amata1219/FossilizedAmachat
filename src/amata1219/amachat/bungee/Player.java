@@ -1,7 +1,7 @@
 package amata1219.amachat.bungee;
 
 import java.io.File;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import amata1219.amachat.chat.Chat;
@@ -12,7 +12,7 @@ public class Player {
 
 	private UUID uuid;
 	private Config config;
-	private List<UUID> mutePlayers;
+	private Set<UUID> mutePlayers;
 
 	private long address = 0L;
 
@@ -38,7 +38,7 @@ public class Player {
 
 		});
 
-		player.mutePlayers = player.config.getUniqueIdList("MutedPlayers");
+		player.mutePlayers = player.config.getUniqueIdSet("MutedPlayers");
 
 		return player;
 	}
@@ -55,7 +55,7 @@ public class Player {
 		return config.getConfig().getBoolean("Ban");
 	}
 
-	public List<UUID> getMutePlayers(){
+	public Set<UUID> getMutePlayers(){
 		return mutePlayers;
 	}
 

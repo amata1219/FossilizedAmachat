@@ -1,6 +1,6 @@
 package amata1219.amachat.chat;
 
-public interface Id extends Chat {
+public interface Id {
 
 	long getId();
 

@@ -3,6 +3,7 @@ package amata1219.amachat.bungee;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import amata1219.amachat.processor.Processor;
@@ -39,8 +40,12 @@ public class ProcessorManager {
 		return REGISTRY.get(processorName);
 	}
 
-	public static List<Processor> get(List<String> processorNames){
-		return REGISTRY.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toList());
+	public static Set<Processor> get(List<String> processorNames){
+		return REGISTRY.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toSet());
+	}
+
+	public static Set<Processor> get(Set<String> processorNames){
+		return REGISTRY.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toSet());
 	}
 
 }

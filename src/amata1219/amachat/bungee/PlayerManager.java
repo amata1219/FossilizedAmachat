@@ -1,9 +1,9 @@
 package amata1219.amachat.bungee;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -54,7 +54,7 @@ public class PlayerManager implements Listener {
 		return players.values().stream().collect(Collectors.toList());
 	}
 
-	public List<Player> getPlayers(Collection<UUID> uuids){
+	public List<Player> getPlayers(Set<UUID> uuids){
 		return players.values().stream().filter(player -> uuids.contains(player.getUniqueId())).collect(Collectors.toList());
 	}
 

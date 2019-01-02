@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import amata1219.amachat.chat.Id;
 import amata1219.amachat.chat.Chat;
 
 public class ChatManager {
@@ -44,7 +43,7 @@ public class ChatManager {
 		return map.get(id);
 	}
 
-	public Collection<Chat> getIChats(){
+	public Collection<Chat> getChats(){
 		return map.values();
 	}
 
