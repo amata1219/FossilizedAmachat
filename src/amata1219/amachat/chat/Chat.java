@@ -1,6 +1,7 @@
 package amata1219.amachat.chat;
 
 import amata1219.amachat.bungee.Player;
+import amata1219.amachat.processor.FormatType;
 
 public interface Chat {
 
@@ -8,6 +9,8 @@ public interface Chat {
 
 	void chat(Player player, String message);
 
-	boolean equals(Chat chat);
+	boolean qualsType(Chat chat);
+
+	String getFormat(FormatType type);
 
 }

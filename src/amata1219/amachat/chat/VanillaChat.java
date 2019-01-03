@@ -11,8 +11,9 @@ import amata1219.amachat.bungee.Config;
 import amata1219.amachat.bungee.Initializer;
 import amata1219.amachat.bungee.Player;
 import amata1219.amachat.bungee.PlayerManager;
-import amata1219.amachat.bungee.ProcessorManager;
+import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.Processor;
+import amata1219.amachat.processor.ProcessorManager;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.config.Configuration;
 
@@ -20,9 +21,11 @@ public class VanillaChat implements Chat {
 
 	public static final String NAME = "Vanilla";
 
+	public static final long ID = 0L;
 	private Config config;
 	private Set<String> processors;
-	private Set<UUID> mutedPlayers;
+	private Set<UUID> players;
+	private Set<UUID> muted;
 
 	private VanillaChat(){
 
@@ -46,7 +49,7 @@ public class VanillaChat implements Chat {
 		});
 
 		chat.processors = new HashSet<>(config.getConfig().getStringList("Processors"));
-		chat.mutedPlayers = config.getUniqueIdSet("MutedPlayers");
+		chat.muted = config.getUniqueIdSet("MutedPlayers");
 
 		return chat;
 	}
@@ -61,7 +64,7 @@ public class VanillaChat implements Chat {
 		if(!canChat())
 			return;
 
-		if(mutedPlayers.contains(player.getUniqueId()))
+		if(muted.contains(player.getUniqueId()))
 			return;
 
 		ChatMessageEvent4Bot event = new ChatMessageEvent4Bot(this, player, message);
@@ -71,17 +74,22 @@ public class VanillaChat implements Chat {
 
 		String text = event.getMessage();
 		for(Processor processor : ProcessorManager.get(processors))
-			text = processor.prosess(text);
-		
-		
+			text = processor.process(text);
+
+
 
 		TextComponent component = new TextComponent(message);
-		PlayerManager.getInstance().getPlayers(mutedPlayers).forEach(p -> p.send(component));
+		PlayerManager.getInstance().getPlayers(players).forEach(p -> p.send(component));
 	}
 
 	@Override
-	public boolean equals(Chat chat) {
-		return chat instanceof VanillaChat;
+	public boolean qualsType(Chat chat) {
+		return chat != null && chat instanceof VanillaChat;
+	}
+
+	@Override
+	public String getFormat(FormatType type) {
+		return null;
 	}
 
 	public boolean canChat(){

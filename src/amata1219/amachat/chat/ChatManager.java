@@ -1,10 +1,8 @@
-package amata1219.amachat.bungee;
+package amata1219.amachat.chat;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import amata1219.amachat.chat.Chat;
 
 public class ChatManager {
 

@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import amata1219.amachat.chat.Chat;
+import amata1219.amachat.chat.ChatManager;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.config.Configuration;
 
@@ -45,6 +46,10 @@ public class Player {
 
 	public UUID getUniqueId(){
 		return uuid;
+	}
+
+	public String getName(){
+		return Amachat.getPlugin().getProxy().getPlayer(uuid).getName();
 	}
 
 	public boolean isMuted(){

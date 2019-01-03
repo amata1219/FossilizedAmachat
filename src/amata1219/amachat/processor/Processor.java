@@ -4,6 +4,6 @@ public interface Processor {
 
 	String getName();
 
-	String prosess(String text);
+	String process(String text);
 
 }

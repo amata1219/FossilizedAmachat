@@ -2,7 +2,7 @@ package amata1219.amachat.processor;
 
 public class GoogleIME implements Processor {
 
-	private static final String NAME = "GoogleIME";
+	public static final String NAME = "GoogleIME";
 
 	@Override
 	public String getName() {
@@ -10,8 +10,12 @@ public class GoogleIME implements Processor {
 	}
 
 	@Override
-	public String prosess(String text) {
+	public String process(String text) {
 		return null;
+	}
+
+	public static boolean canConvert(String text){
+		return text.length() == text.getBytes().length;
 	}
 
 }

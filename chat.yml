@@ -1,6 +1,9 @@
 Version: '1.0'
 Chat: true
-Format: '[player]&a:&r <n>[message]</n><i>[japanized]&7([message])</i><t>[translation]&7([message])</t>'
+Format:
+  Normal: '[player]&a:&r [message]'
+  Japanized: '[player]&a:&r [japanized]&7([message])'
+  Translation: '[player]&a:&r [translation]&7([message])'
 Processors: []
 Bots: []
 Players: []
