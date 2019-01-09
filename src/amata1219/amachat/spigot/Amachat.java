@@ -18,6 +18,8 @@ public class Amachat extends JavaPlugin implements Listener, PluginMessageListen
 	@Override
 	public void onEnable() {
 		plugin = this;
+
+		getServer().getPluginManager().registerEvents(this, this);
 	}
 
 	@Override

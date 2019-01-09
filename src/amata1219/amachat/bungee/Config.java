@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import com.google.common.io.ByteStreams;
 
+import amata1219.amachat.Util;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -101,6 +102,10 @@ public class Config{
 	public void apply(){
 		save();
 		reload();
+	}
+
+	public Set<String> getStringSet(String path){
+		return Util.listToSet(config.getStringList(path));
 	}
 
 	public UUID getUniqueId(String path){

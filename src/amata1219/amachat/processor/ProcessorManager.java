@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import amata1219.amachat.bungee.Config;
 import amata1219.amachat.bungee.Player;
 
 public class ProcessorManager {
@@ -51,6 +50,9 @@ public class ProcessorManager {
 
 	public static String processAll(Player player, String text, Map<FormatType, String> formats, Set<String> processorNames){
 		String message = text;
+		if(processorNames.contains(Coloring.NAME))
+			message = get(Coloring.NAME).process(message);
+
 		FormatType type = FormatType.NORMAL;
 		if(processorNames.contains(GoogleIME.NAME) && GoogleIME.canConvert(text))
 			type = FormatType.JAPANIZED;
