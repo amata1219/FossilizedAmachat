@@ -108,6 +108,14 @@ public class Config{
 		return Util.listToSet(config.getStringList(path));
 	}
 
+	public Set<Integer> getIntegerSet(String path){
+		return Util.listToSet(config.getIntList(path));
+	}
+
+	public Set<Long> getLongSet(String path){
+		return Util.listToSet(config.getLongList(path));
+	}
+
 	public UUID getUniqueId(String path){
 		Object def = config.getDefault(path);
 		return UUID.fromString(config.getString(path, (def instanceof String) ? (String) def : ""));

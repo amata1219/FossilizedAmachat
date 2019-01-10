@@ -13,7 +13,9 @@ import amata1219.amachat.bungee.Config;
 import amata1219.amachat.bungee.Initializer;
 import amata1219.amachat.bungee.Logger;
 import amata1219.amachat.bungee.Player;
+import amata1219.amachat.event.AmachatBroadcastEvent;
 import amata1219.amachat.event.AmachatMessageEvent;
+import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.ProcessorManager;
 import net.md_5.bungee.api.ChatColor;
@@ -63,19 +65,36 @@ public class VanillaChat implements Chat {
 			return;
 		}
 
-		AmachatMessageEvent4Bot event4bot = AmachatMessageEvent4Bot.fire(this, player, message);
-		if(event4bot.isCancelled()){
-			Logger.info(ChatColor.GRAY + "Cancelled@" + message);
+		Chat matched = PrefixManager.matchChat(message);
+		if(matched != null && matched.isJoin(player.getUniqueId())){
+			matched.chat(player, message);
 			return;
 		}
 
-		AmachatMessageEvent event = AmachatMessageEvent.call(this, player, message);
+		AmachatMessageEvent4Bot event4bot = AmachatMessageEvent4Bot.fire(this, player, message);
+		if(event4bot.isCancelled()){
+			Logger.info(ChatColor.GRAY + "Cancelled@" + event4bot.getMessage());
+			return;
+		}
+
+		AmachatMessageEvent event = AmachatMessageEvent.call(this, player, event4bot.getMessage());
 		if(event.isCancelled()){
-			Logger.info(ChatColor.GRAY + "Cancelled@" + message);
+			Logger.info(ChatColor.GRAY + "Cancelled@" + event.getMessage());
 			return;
 		}
 
 		ChatManager.sendMessageAndLogging(ProcessorManager.processAll(player, event.getMessage(), formats, processors), players);
+	}
+
+	@Override
+	public void broadcast(String message){
+		AmachatBroadcastEvent event = AmachatBroadcastEvent.call(this, message);
+		if(event.isCancelled()){
+			Logger.info(ChatColor.GRAY + "Cancelled@" + event.getMessage());
+			return;
+		}
+
+		ChatManager.sendMessageAndLogging(event.getMessage(), players);
 	}
 
 	@Override

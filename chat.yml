@@ -5,6 +5,5 @@ Format:
   Japanized: '[player]&a:&r [japanized]&7([message])'
   Translation: '[player]&a:&r [translation]&7([message])'
 Processors: []
-Bots: []
 Players: []
 MutedPlayers: []

@@ -13,6 +13,7 @@ import amata1219.amachat.bungee.Config;
 import amata1219.amachat.bungee.Initializer;
 import amata1219.amachat.bungee.Logger;
 import amata1219.amachat.bungee.Player;
+import amata1219.amachat.event.AmachatBroadcastEvent;
 import amata1219.amachat.event.AmachatMessageEvent;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.processor.Coloring;
@@ -20,6 +21,7 @@ import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.Processor;
 import amata1219.amachat.processor.ProcessorManager;
 import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.config.Configuration;
 
 public class ChannelChat implements Chat, Id, Prefix {
@@ -57,7 +59,7 @@ public class ChannelChat implements Chat, Id, Prefix {
 
 		});
 
-		Configuration conf = config.getConfig();
+		Configuration conf = chat.config.getConfig();
 		Map<FormatType, String> formats = chat.formats;
 		Processor coloring = ProcessorManager.get(Coloring.NAME);
 		formats.put(FormatType.NORMAL, coloring.process(conf.getString("Format.Normal")));
@@ -79,17 +81,28 @@ public class ChannelChat implements Chat, Id, Prefix {
 
 		AmachatMessageEvent4Bot event4bot = AmachatMessageEvent4Bot.fire(this, player, message);
 		if(event4bot.isCancelled()){
-			Logger.grayInfo("Cancelled@" + message);
+			Logger.grayInfo("Cancelled@" + event4bot.getMessage());
 			return;
 		}
 
 		AmachatMessageEvent event = AmachatMessageEvent.call(this, player, message);
 		if(event.isCancelled()){
-			Logger.grayInfo("Cancelled@" + message);
+			Logger.grayInfo("Cancelled@" + event.getMessage());
 			return;
 		}
 
 		ChatManager.sendMessage(ProcessorManager.processAll(player, event.getMessage(), formats, processors), players);
+	}
+
+	@Override
+	public void broadcast(String message){
+		AmachatBroadcastEvent event = AmachatBroadcastEvent.call(this, message);
+		if(event.isCancelled()){
+			Logger.info(ChatColor.GRAY + "Cancelled@" + event.getMessage());
+			return;
+		}
+
+		ChatManager.sendMessageAndLogging(event.getMessage(), players);
 	}
 
 	@Override

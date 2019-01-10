@@ -13,6 +13,8 @@ public interface Chat {
 
 	void chat(Player player, String message);
 
+	void broadcast(String message);
+
 	Config getConfig();
 
 	boolean canChat();

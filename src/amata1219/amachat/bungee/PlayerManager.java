@@ -1,7 +1,6 @@
 package amata1219.amachat.bungee;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -50,12 +49,12 @@ public class PlayerManager implements Listener {
 		return players.get(uuid);
 	}
 
-	public List<Player> getPlayers(){
-		return players.values().stream().collect(Collectors.toList());
+	public Set<Player> getPlayers(){
+		return players.values().stream().collect(Collectors.toSet());
 	}
 
-	public List<Player> getPlayers(Set<UUID> uuids){
-		return players.values().stream().filter(player -> uuids.contains(player.getUniqueId())).collect(Collectors.toList());
+	public Set<Player> getPlayers(Set<UUID> uuids){
+		return players.values().stream().filter(player -> uuids.contains(player.getUniqueId())).collect(Collectors.toSet());
 	}
 
 }

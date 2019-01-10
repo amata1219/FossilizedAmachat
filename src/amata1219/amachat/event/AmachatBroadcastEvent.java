@@ -1,37 +1,30 @@
 package amata1219.amachat.event;
 
-import amata1219.amachat.bungee.Player;
 import amata1219.amachat.chat.Chat;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.plugin.Cancellable;
 import net.md_5.bungee.api.plugin.Event;
 
-public class AmachatMessageEvent extends Event implements Cancellable {
+public class AmachatBroadcastEvent extends Event implements Cancellable {
 
 	private Chat chat;
-	private Player player;
 	private String message;
 
 	private boolean cancelled;
 
-	public AmachatMessageEvent(Chat chat, Player player, String message){
+	public AmachatBroadcastEvent(Chat chat, String message){
 		this.chat = chat;
-		this.player = player;
 		this.message = message;
 	}
 
-	public static AmachatMessageEvent call(Chat chat, Player player, String message){
-		AmachatMessageEvent event = new AmachatMessageEvent(chat, player, message);
+	public static AmachatBroadcastEvent call(Chat chat, String message){
+		AmachatBroadcastEvent event = new AmachatBroadcastEvent(chat, message);
 		BungeeCord.getInstance().getPluginManager().callEvent(event);
 		return event;
 	}
 
 	public Chat getChat(){
 		return chat;
-	}
-
-	public Player getPlayer(){
-		return player;
 	}
 
 	public String getMessage(){

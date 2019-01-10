@@ -2,6 +2,7 @@ package amata1219.amachat.chat;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,6 +50,12 @@ public class ChatManager {
 
 	public Collection<Chat> getChats(){
 		return map.values();
+	}
+
+	public Set<Chat> getChats(Set<Long> ids){
+		Set<Chat> chats = new HashSet<>();
+		map.keySet().stream().filter(key -> ids.contains(key)).forEach(key -> chats.add(map.get(key)));
+		return chats;
 	}
 
 	public void addChat(long id, Chat chat){
