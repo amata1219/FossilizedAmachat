@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -55,6 +56,18 @@ public class PlayerManager implements Listener {
 
 	public Set<Player> getPlayers(Set<UUID> uuids){
 		return players.values().stream().filter(player -> uuids.contains(player.getUniqueId())).collect(Collectors.toSet());
+	}
+
+	boolean fix(ProxiedPlayer player){
+		if(player == null || !player.isConnected())
+			return false;
+
+		UUID uuid = player.getUniqueId();
+		if(!players.containsKey(uuid))
+			return false;
+
+		players.put(uuid, Player.load(uuid));
+		return true;
 	}
 
 }

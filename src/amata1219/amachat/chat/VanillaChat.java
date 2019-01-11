@@ -43,19 +43,24 @@ public class VanillaChat implements Chat {
 
 			@Override
 			public void done(Config config) {
-				Configuration conf = config.getConfig();
 
-				conf.set("Version", Amachat.VERSION);
-
-				config.apply();
 			}
 
 		});
 
 		chat.processors = new HashSet<>(config.getConfig().getStringList("Processors"));
+		chat.players = config.getUniqueIdSet("Players");
 		chat.muted = config.getUniqueIdSet("MutedPlayers");
-
 		return chat;
+	}
+
+	@Override
+	public void save(){
+		Configuration conf = config.getConfig();
+		conf.set("Processors", processors);
+		conf.set("Players", players);
+		conf.set("MutedPlayers", muted);
+		config.apply();
 	}
 
 	@Override
@@ -115,6 +120,7 @@ public class VanillaChat implements Chat {
 	@Override
 	public void setChat(boolean chat) {
 		config.getConfig().set("Chat", chat);
+		config.apply();
 	}
 
 	@Override

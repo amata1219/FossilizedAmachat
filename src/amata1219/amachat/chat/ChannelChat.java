@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import amata1219.amachat.bot.AmachatMessageEvent4Bot;
-import amata1219.amachat.bungee.Amachat;
 import amata1219.amachat.bungee.Config;
 import amata1219.amachat.bungee.Initializer;
 import amata1219.amachat.bungee.Logger;
@@ -50,10 +49,7 @@ public class ChannelChat implements Chat, Id, Prefix {
 			@Override
 			public void done(Config config) {
 				Configuration conf = config.getConfig();
-
-				conf.set("Version", Amachat.VERSION);
 				conf.set("BannedPlayers", Collections.emptyList());
-
 				config.apply();
 			}
 
@@ -69,7 +65,19 @@ public class ChannelChat implements Chat, Id, Prefix {
 		chat.players = config.getUniqueIdSet("Players");
 		chat.muted = config.getUniqueIdSet("MutedPlayers");
 		chat.banned = config.getUniqueIdSet("BannedPlayers");
+		chat.prefix = conf.getString("Prefix");
 		return chat;
+	}
+
+	@Override
+	public void save(){
+		Configuration conf = config.getConfig();
+		conf.set("Processors", processors);
+		conf.set("Players", players);
+		conf.set("MutedPlayers", muted);
+		conf.set("BannedPlayers", banned);
+		conf.set("Prefix", prefix);
+		config.apply();
 	}
 
 	@Override
@@ -128,6 +136,7 @@ public class ChannelChat implements Chat, Id, Prefix {
 	@Override
 	public void setChat(boolean chat) {
 		config.getConfig().set("Chat", chat);
+		config.apply();
 	}
 
 	@Override

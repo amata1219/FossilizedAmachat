@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
+import amata1219.amachat.chat.VanillaChat;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.config.Configuration;
 
@@ -30,10 +31,7 @@ public class Player {
 			@Override
 			public void done(Config config) {
 				Configuration conf = config.getConfig();
-
-				conf.set("Version", Amachat.VERSION);
 				conf.set("UUID", uuid.toString());
-
 				config.apply();
 			}
 
@@ -65,7 +63,9 @@ public class Player {
 	}
 
 	public Chat getAddress(){
-		return ChatManager.getInstance().getChat(address);
+		ChatManager manager = ChatManager.getInstance();
+		Chat chat = manager.getChat(address);
+		return chat == null ? manager.getChat(VanillaChat.ID) : chat;
 	}
 
 	public void setAddress(long id){

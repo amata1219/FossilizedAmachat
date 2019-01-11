@@ -25,7 +25,6 @@ public class Config{
 	 * datafolder
 	 * config.yml
 	 * vanilla.yml
-	 * mail.yml
 	 * room.yml
 	 * - players
 	 *   uuid.yml

@@ -1,0 +1,10 @@
+Version: '1.0'
+GoogleIME:
+  Enable: true
+GoogleTranslate:
+  Enable: true
+  ScriptURL: ''
+  LanguageCodes:
+    - 'JA'
+    - 'EN'
+    - 'ZH'

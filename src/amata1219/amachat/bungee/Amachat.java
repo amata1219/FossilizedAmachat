@@ -1,13 +1,9 @@
 package amata1219.amachat.bungee;
 
-import java.util.UUID;
+import java.io.File;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteStreams;
-
-import amata1219.amachat.MessageChannel;
-import amata1219.amachat.chat.Chat;
-import net.md_5.bungee.api.event.PluginMessageEvent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
@@ -15,51 +11,64 @@ import net.md_5.bungee.event.EventHandler;
 public class Amachat extends Plugin implements Listener {
 
 	private static Amachat plugin;
-
 	public static final String VERSION = "1.0";
+
+	private Config config;
 
 	@Override
 	public void onEnable() {
 		plugin = this;
+
+		config = Config.load(new File(getDataFolder() + File.separator + "config.yml"), "config.yml", new Initializer(){
+
+			@Override
+			public void done(Config config) {
+			}
+
+		});
 
 		getProxy().getPluginManager().registerListener(this, this);
 	}
 
 	@Override
 	public void onDisable() {
+
 	}
 
-	public static Amachat getPlugin(){
+	public static Amachat getPlugin() {
 		return plugin;
 	}
 
+	public Config getConfig(){
+		return config;
+	}
+
 	@EventHandler
-	public void onReceive(PluginMessageEvent e){
-		String tag = e.getTag();
-		if(!tag.equals("BungeeCord") || !tag.equals("bungeecord:main"))
+	public void onChat(ChatEvent e) {
+		if(!(e.getSender() instanceof ProxiedPlayer))
 			return;
 
-		ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
-		MessageChannel channel = MessageChannel.newInstance(in);
+		e.setCancelled(true);
+		Amachat.chat((ProxiedPlayer) e.getSender(), e.getMessage());
+	}
 
-		channel.read(in);
-		UUID uuid = UUID.fromString(channel.getMessage());
-
-		Player player = PlayerManager.getInstance().getPlayer(uuid);
-		Chat chat = player.getAddress();
-		if(chat == null)
+	@SuppressWarnings("deprecation")
+	public static void chat(final ProxiedPlayer sender, String message){
+		if(sender == null || message == null)
 			return;
 
-		channel.read(in);
-		chat.chat(player, channel.getMessage());
+		PlayerManager manager = PlayerManager.getInstance();
+		final Player player = manager.getPlayer(sender.getUniqueId());
+		if(player == null && !manager.fix(sender))
+			return;
+
+		Amachat.getPlugin().getExecutorService().execute(new Runnable(){
+
+			@Override
+			public void run() {
+				player.getAddress().chat(player, message);
+			}
+
+		});
 	}
-
-	public void registerIChat(Chat iChat){
-
-	}
-
-	public void unregisterIChat(String chatName){
-
-	}
-
 }

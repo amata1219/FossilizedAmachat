@@ -11,6 +11,8 @@ public interface Chat {
 
 	String getName();
 
+	void save();
+
 	void chat(Player player, String message);
 
 	void broadcast(String message);

@@ -28,4 +28,11 @@ public class Util {
 		return new HashSet<T>(list);
 	}
 
+	public static String getArgument(String[] args, int index){
+		if(args.length <= index)
+			return "";
+		else
+			return args[index];
+	}
+
 }
