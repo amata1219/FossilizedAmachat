@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import amata1219.amachat.bungee.Player;
+import amata1219.amachat.player.Player;
 
 public class ProcessorManager {
 

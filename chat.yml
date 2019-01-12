@@ -1,9 +1,9 @@
-Version: '1.0'
-Chat: true
+Version: 0.0
+CanChat: true
 Format:
   Normal: '[player]&a:&r [message]'
   Japanized: '[player]&a:&r [japanized]&7([message])'
   Translation: '[player]&a:&r [translation]&7([message])'
 Processors: []
 Players: []
-MutedPlayers: []
+Muted: []

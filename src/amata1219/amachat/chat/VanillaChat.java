@@ -7,14 +7,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import amata1219.amachat.Amachat;
+import amata1219.amachat.Config;
+import amata1219.amachat.Logger;
+import amata1219.amachat.Util;
 import amata1219.amachat.bot.AmachatMessageEvent4Bot;
-import amata1219.amachat.bungee.Amachat;
-import amata1219.amachat.bungee.Config;
-import amata1219.amachat.bungee.Initializer;
-import amata1219.amachat.bungee.Logger;
-import amata1219.amachat.bungee.Player;
 import amata1219.amachat.event.AmachatBroadcastEvent;
 import amata1219.amachat.event.AmachatMessageEvent;
+import amata1219.amachat.player.Player;
 import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.ProcessorManager;
@@ -27,6 +27,7 @@ public class VanillaChat implements Chat {
 	public static final long ID = 0L;
 
 	private Config config;
+	private boolean chat;
 	private HashMap<FormatType, String> formats = new HashMap<>();
 	private Set<String> processors;
 	private Set<UUID> players;
@@ -38,28 +39,21 @@ public class VanillaChat implements Chat {
 
 	public static VanillaChat load(){
 		VanillaChat chat = new VanillaChat();
-
-		Config config = chat.config = Config.load(new File(Amachat.getPlugin().getDataFolder(), "vanilla.yml"), "chat.yml", new Initializer(){
-
-			@Override
-			public void done(Config config) {
-
-			}
-
-		});
-
+		Config config = chat.config = Config.load(new File(Amachat.getPlugin().getDataFolder(), "vanilla.yml"), "chat.yml");
+		chat.chat = config.getConfig().getBoolean("CanChat");
 		chat.processors = new HashSet<>(config.getConfig().getStringList("Processors"));
 		chat.players = config.getUniqueIdSet("Players");
-		chat.muted = config.getUniqueIdSet("MutedPlayers");
+		chat.muted = config.getUniqueIdSet("Muted");
 		return chat;
 	}
 
 	@Override
 	public void save(){
 		Configuration conf = config.getConfig();
+		conf.set("CanChat", chat);
 		conf.set("Processors", processors);
-		conf.set("Players", players);
-		conf.set("MutedPlayers", muted);
+		conf.set("Players", Util.toStringSet(players));
+		conf.set("Muted", Util.toStringSet(muted));
 		config.apply();
 	}
 
@@ -88,7 +82,7 @@ public class VanillaChat implements Chat {
 			return;
 		}
 
-		ChatManager.sendMessageAndLogging(ProcessorManager.processAll(player, event.getMessage(), formats, processors), players);
+		ChatManager.sendMessageAndLog(ProcessorManager.processAll(player, event.getMessage(), formats, processors), players);
 	}
 
 	@Override
@@ -99,12 +93,17 @@ public class VanillaChat implements Chat {
 			return;
 		}
 
-		ChatManager.sendMessageAndLogging(event.getMessage(), players);
+		ChatManager.sendMessageAndLog(event.getMessage(), players);
 	}
 
 	@Override
 	public String getName() {
 		return VanillaChat.NAME;
+	}
+
+	@Override
+	public long getId() {
+		return VanillaChat.ID;
 	}
 
 	@Override
@@ -114,13 +113,12 @@ public class VanillaChat implements Chat {
 
 	@Override
 	public boolean canChat() {
-		return config.getConfig().getBoolean("Chat");
+		return chat;
 	}
 
 	@Override
 	public void setChat(boolean chat) {
-		config.getConfig().set("Chat", chat);
-		config.apply();
+		this.chat = chat;
 	}
 
 	@Override

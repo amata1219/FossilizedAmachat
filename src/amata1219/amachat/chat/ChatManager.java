@@ -6,9 +6,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import amata1219.amachat.bungee.Logger;
-import amata1219.amachat.bungee.Player;
-import amata1219.amachat.bungee.PlayerManager;
+import amata1219.amachat.Logger;
+import amata1219.amachat.player.Player;
+import amata1219.amachat.player.PlayerManager;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class ChatManager {
@@ -73,9 +73,9 @@ public class ChatManager {
 			player.send(component);
 	}
 
-	public static void sendMessageAndLogging(String message, UUID uuid){
+	public static void sendMessageAndLog(String message, UUID uuid){
 		Logger.info(message);
-		sendMessageAndLogging(message, uuid);
+		sendMessageAndLog(message, uuid);
 	}
 
 	public static void sendMessage(String message, Set<UUID> uuids){
@@ -83,9 +83,9 @@ public class ChatManager {
 		PlayerManager.getInstance().getPlayers(uuids).forEach(player -> player.send(component));
 	}
 
-	public static void sendMessageAndLogging(String message, Set<UUID> uuids){
+	public static void sendMessageAndLog(String message, Set<UUID> uuids){
 		Logger.info(message);
-		sendMessageAndLogging(message, uuids);
+		sendMessageAndLog(message, uuids);
 	}
 
 }

@@ -10,7 +10,7 @@ import java.net.URLEncoder;
 
 import javax.xml.ws.ProtocolException;
 
-import amata1219.amachat.bungee.Amachat;
+import amata1219.amachat.Amachat;
 import net.md_5.bungee.config.Configuration;
 
 public class GoogleTranslate implements Processor {

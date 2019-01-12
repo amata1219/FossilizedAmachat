@@ -6,20 +6,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import amata1219.amachat.bungee.Amachat;
-import amata1219.amachat.bungee.Config;
-import amata1219.amachat.bungee.Initializer;
+import amata1219.amachat.Amachat;
+import amata1219.amachat.Config;
+import amata1219.amachat.Initializer;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
-import amata1219.amachat.chat.Id;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 
-public class AutoMessageBot implements TaskBot, Id {
+public class AutoMessageBot implements TaskBot {
 
 	public static final String NAME = "AutoMessageBot";
-	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Bots");
+	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Bots" + File.separator + "AutoMessageBots");
 
 	private final long id;
 	private Config config;
@@ -40,14 +39,11 @@ public class AutoMessageBot implements TaskBot, Id {
 		Config config = bot.config = Config.load(new File(DIRECTORY, String.valueOf(id) + ".yml"), "bot.yml", new Initializer(){
 
 			@Override
-			public void done(Config config) {
+			public void initialize(Config config) {
 				Configuration conf = config.getConfig();
-
-				conf.set("Version", Amachat.VERSION);
 				conf.set("Chats", Collections.emptySet());
 				conf.set("Messages", Collections.emptySet());
 				conf.set("Interval", 300);
-
 				config.apply();
 			}
 

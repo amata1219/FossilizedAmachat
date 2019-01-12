@@ -1,4 +1,4 @@
-package amata1219.amachat.bungee;
+package amata1219.amachat.player;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import amata1219.amachat.Amachat;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
@@ -58,7 +59,7 @@ public class PlayerManager implements Listener {
 		return players.values().stream().filter(player -> uuids.contains(player.getUniqueId())).collect(Collectors.toSet());
 	}
 
-	boolean fix(ProxiedPlayer player){
+	public boolean fix(ProxiedPlayer player){
 		if(player == null || !player.isConnected())
 			return false;
 

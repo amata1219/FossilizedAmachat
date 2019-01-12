@@ -3,6 +3,7 @@ package amata1219.amachat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -33,6 +34,16 @@ public class Util {
 			return "";
 		else
 			return args[index];
+	}
+
+	public static Set<String> toStringSet(Set<UUID> uuids){
+		Set<String> set = new HashSet<>();
+		uuids.forEach(uuid -> set.add(uuid.toString()));
+		return set;
+	}
+
+	public static boolean isYamlConfiguration(String fileName){
+		return fileName.endsWith(".yml");
 	}
 
 }

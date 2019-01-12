@@ -1,20 +1,28 @@
-package amata1219.amachat.bungee;
+package amata1219.amachat.player;
 
 import java.io.File;
 import java.util.Set;
 import java.util.UUID;
 
+import amata1219.amachat.Amachat;
+import amata1219.amachat.Config;
+import amata1219.amachat.Initializer;
+import amata1219.amachat.Util;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.chat.VanillaChat;
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.config.Configuration;
 
 public class Player {
 
 	private UUID uuid;
 	private Config config;
-	private Set<UUID> mutePlayers;
+	private boolean mute;
+	private boolean ban;
+	private Set<UUID> muted;
 
 	private long address = 0L;
 
@@ -29,7 +37,7 @@ public class Player {
 		player.config = Config.load(new File(Amachat.getPlugin().getDataFolder() + File.separator + "PlayerData", uuid.toString() + ".yml"), "uuid.yml", new Initializer(){
 
 			@Override
-			public void done(Config config) {
+			public void initialize(Config config) {
 				Configuration conf = config.getConfig();
 				conf.set("UUID", uuid.toString());
 				config.apply();
@@ -37,13 +45,24 @@ public class Player {
 
 		});
 
-		player.mutePlayers = player.config.getUniqueIdSet("MutedPlayers");
-
+		player.muted = player.config.getUniqueIdSet("Muted");
 		return player;
+	}
+
+	public void save(){
+		Configuration conf = config.getConfig();
+		conf.set("Mute", mute);
+		conf.set("Ban", ban);
+		conf.set("Muted", Util.toStringSet(muted));
+		config.apply();
 	}
 
 	public UUID getUniqueId(){
 		return uuid;
+	}
+
+	public ProxiedPlayer getPlayer(){
+		return BungeeCord.getInstance().getPlayer(uuid);
 	}
 
 	public String getName(){
@@ -51,15 +70,15 @@ public class Player {
 	}
 
 	public boolean isMuted(){
-		return config.getConfig().getBoolean("Mute");
+		return mute;
 	}
 
 	public boolean isBanned(){
-		return config.getConfig().getBoolean("Ban");
+		return ban;
 	}
 
 	public Set<UUID> getMutePlayers(){
-		return mutePlayers;
+		return muted;
 	}
 
 	public Chat getAddress(){

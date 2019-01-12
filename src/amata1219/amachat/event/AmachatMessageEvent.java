@@ -1,7 +1,7 @@
 package amata1219.amachat.event;
 
-import amata1219.amachat.bungee.Player;
 import amata1219.amachat.chat.Chat;
+import amata1219.amachat.player.Player;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.plugin.Cancellable;
 import net.md_5.bungee.api.plugin.Event;

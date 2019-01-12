@@ -1,4 +1,4 @@
-package amata1219.amachat.bungee;
+package amata1219.amachat;
 
 import net.md_5.bungee.api.ChatColor;
 

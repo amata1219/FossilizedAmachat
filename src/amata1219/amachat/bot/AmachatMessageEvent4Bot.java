@@ -3,8 +3,8 @@ package amata1219.amachat.bot;
 import java.util.HashSet;
 import java.util.Set;
 
-import amata1219.amachat.bungee.Player;
 import amata1219.amachat.chat.Chat;
+import amata1219.amachat.player.Player;
 
 public class AmachatMessageEvent4Bot {
 

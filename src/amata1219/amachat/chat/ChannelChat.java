@@ -7,13 +7,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import amata1219.amachat.Config;
+import amata1219.amachat.Initializer;
+import amata1219.amachat.Logger;
+import amata1219.amachat.Util;
 import amata1219.amachat.bot.AmachatMessageEvent4Bot;
-import amata1219.amachat.bungee.Config;
-import amata1219.amachat.bungee.Initializer;
-import amata1219.amachat.bungee.Logger;
-import amata1219.amachat.bungee.Player;
 import amata1219.amachat.event.AmachatBroadcastEvent;
 import amata1219.amachat.event.AmachatMessageEvent;
+import amata1219.amachat.player.Player;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.processor.Coloring;
 import amata1219.amachat.processor.FormatType;
@@ -23,13 +24,14 @@ import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.config.Configuration;
 
-public class ChannelChat implements Chat, Id, Prefix {
+public class ChannelChat implements Chat, Prefix {
 
 	public static final String NAME = "ChannelChat";
 	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Channels");
 
 	private final long id;
 	private Config config;
+	private boolean chat;
 	private Map<FormatType, String> formats = new HashMap<>();
 	private Set<String> processors;
 	private Set<UUID> players;
@@ -47,15 +49,16 @@ public class ChannelChat implements Chat, Id, Prefix {
 		Config config = chat.config = Config.load(new File(DIRECTORY, String.valueOf(id) + ".yml"), "chat.yml", new Initializer(){
 
 			@Override
-			public void done(Config config) {
+			public void initialize(Config config) {
 				Configuration conf = config.getConfig();
-				conf.set("BannedPlayers", Collections.emptyList());
+				conf.set("Banned", Collections.emptySet());
 				config.apply();
 			}
 
 		});
 
 		Configuration conf = chat.config.getConfig();
+		chat.chat = conf.getBoolean("CanChat");
 		Map<FormatType, String> formats = chat.formats;
 		Processor coloring = ProcessorManager.get(Coloring.NAME);
 		formats.put(FormatType.NORMAL, coloring.process(conf.getString("Format.Normal")));
@@ -63,8 +66,8 @@ public class ChannelChat implements Chat, Id, Prefix {
 		formats.put(FormatType.TRANSLATION, coloring.process(conf.getString("Format.Translation")));
 		chat.processors = config.getStringSet("Processors");
 		chat.players = config.getUniqueIdSet("Players");
-		chat.muted = config.getUniqueIdSet("MutedPlayers");
-		chat.banned = config.getUniqueIdSet("BannedPlayers");
+		chat.muted = config.getUniqueIdSet("Muted");
+		chat.banned = config.getUniqueIdSet("Banned");
 		chat.prefix = conf.getString("Prefix");
 		return chat;
 	}
@@ -72,10 +75,11 @@ public class ChannelChat implements Chat, Id, Prefix {
 	@Override
 	public void save(){
 		Configuration conf = config.getConfig();
+		conf.set("CanChat", chat);
 		conf.set("Processors", processors);
-		conf.set("Players", players);
-		conf.set("MutedPlayers", muted);
-		conf.set("BannedPlayers", banned);
+		conf.set("Players", Util.toStringSet(players));
+		conf.set("Muted", Util.toStringSet(muted));
+		conf.set("Banned", Util.toStringSet(banned));
 		conf.set("Prefix", prefix);
 		config.apply();
 	}
@@ -110,17 +114,17 @@ public class ChannelChat implements Chat, Id, Prefix {
 			return;
 		}
 
-		ChatManager.sendMessageAndLogging(event.getMessage(), players);
-	}
-
-	@Override
-	public long getId() {
-		return id;
+		ChatManager.sendMessageAndLog(event.getMessage(), players);
 	}
 
 	@Override
 	public String getName() {
 		return ChannelChat.NAME;
+	}
+
+	@Override
+	public long getId() {
+		return id;
 	}
 
 	@Override
@@ -130,13 +134,12 @@ public class ChannelChat implements Chat, Id, Prefix {
 
 	@Override
 	public boolean canChat() {
-		return config.getConfig().getBoolean("Chat");
+		return chat;
 	}
 
 	@Override
 	public void setChat(boolean chat) {
-		config.getConfig().set("Chat", chat);
-		config.apply();
+		this.chat = chat;
 	}
 
 	@Override

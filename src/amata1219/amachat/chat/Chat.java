@@ -3,13 +3,15 @@ package amata1219.amachat.chat;
 import java.util.Set;
 import java.util.UUID;
 
-import amata1219.amachat.bungee.Config;
-import amata1219.amachat.bungee.Player;
+import amata1219.amachat.Config;
+import amata1219.amachat.player.Player;
 import amata1219.amachat.processor.FormatType;
 
 public interface Chat {
 
 	String getName();
+
+	long getId();
 
 	void save();
 
