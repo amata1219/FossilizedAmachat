@@ -18,7 +18,7 @@ import net.md_5.bungee.config.Configuration;
 public class AutoMessageBot implements TaskBot {
 
 	public static final String NAME = "AutoMessageBot";
-	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Bots" + File.separator + "AutoMessageBots");
+	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "AutoMessageBots");
 
 	private final long id;
 	private Config config;

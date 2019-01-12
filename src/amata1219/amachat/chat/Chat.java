@@ -1,13 +1,17 @@
 package amata1219.amachat.chat;
 
+import java.io.File;
 import java.util.Set;
 import java.util.UUID;
 
 import amata1219.amachat.Config;
 import amata1219.amachat.player.Player;
 import amata1219.amachat.processor.FormatType;
+import net.md_5.bungee.BungeeCord;
 
 public interface Chat {
+
+	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Chat");
 
 	String getName();
 

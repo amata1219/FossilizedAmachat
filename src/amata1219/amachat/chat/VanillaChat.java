@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import amata1219.amachat.Amachat;
 import amata1219.amachat.Config;
 import amata1219.amachat.Logger;
 import amata1219.amachat.Util;
@@ -39,7 +38,7 @@ public class VanillaChat implements Chat {
 
 	public static VanillaChat load(){
 		VanillaChat chat = new VanillaChat();
-		Config config = chat.config = Config.load(new File(Amachat.getPlugin().getDataFolder(), "vanilla.yml"), "chat.yml");
+		Config config = chat.config = Config.load(new File(Chat.DIRECTORY, "vanilla.yml"), "chat.yml");
 		chat.chat = config.getConfig().getBoolean("CanChat");
 		chat.processors = new HashSet<>(config.getConfig().getStringList("Processors"));
 		chat.players = config.getUniqueIdSet("Players");

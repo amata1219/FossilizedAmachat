@@ -20,14 +20,13 @@ import amata1219.amachat.processor.Coloring;
 import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.Processor;
 import amata1219.amachat.processor.ProcessorManager;
-import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.config.Configuration;
 
 public class ChannelChat implements Chat, Prefix {
 
 	public static final String NAME = "ChannelChat";
-	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Channels");
+	public static final File DIRECTORY = new File(Chat.DIRECTORY + File.separator + "Channels");
 
 	private final long id;
 	private Config config;

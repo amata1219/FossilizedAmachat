@@ -46,4 +46,8 @@ public class Util {
 		return fileName.endsWith(".yml");
 	}
 
+	public static String[] toArgs(String... args){
+		return args;
+	}
+
 }

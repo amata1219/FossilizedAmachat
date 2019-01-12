@@ -16,13 +16,12 @@ import amata1219.amachat.Config;
 import amata1219.amachat.Initializer;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
-import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.config.Configuration;
 
 public class ActionBot implements Bot, AmachatMessageEventListener4Bot {
 
 	public static final String NAME = "ActionBot";
-	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Bots" + File.separator + "ActionBots");
+	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "ActionBots");
 
 	private final long id;
 	private Config config;
