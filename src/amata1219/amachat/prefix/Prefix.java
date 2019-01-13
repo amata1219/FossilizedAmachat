@@ -1,6 +1,8 @@
 package amata1219.amachat.prefix;
 
-public interface Prefix {
+import amata1219.amachat.chat.Chat;
+
+public interface Prefix extends Chat{
 
 	boolean hasPrefix();
 

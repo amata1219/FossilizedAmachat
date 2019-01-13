@@ -45,6 +45,7 @@ public class ChatBot implements Bot, AmachatMessageEventListener4Bot {
 		bot.chats = config.getLongSet("Chats");
 		Configuration section = conf.getSection("Responces");
 		section.getKeys().forEach(responce -> bot.responces.put(responce, section.getString(responce)));
+		bot.load();
 		return bot;
 	}
 

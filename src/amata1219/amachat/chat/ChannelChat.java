@@ -23,7 +23,7 @@ import amata1219.amachat.processor.ProcessorManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.config.Configuration;
 
-public class ChannelChat implements Chat, Prefix {
+public class ChannelChat implements Prefix {
 
 	public static final String NAME = "ChannelChat";
 	public static final File DIRECTORY = new File(Chat.DIRECTORY + File.separator + "Channels");
@@ -75,6 +75,10 @@ public class ChannelChat implements Chat, Prefix {
 	public void save(){
 		Configuration conf = config.getConfig();
 		conf.set("CanChat", chat);
+		formats.forEach((k, v) -> {
+			String section = k.name();
+			conf.set(Character.toUpperCase(section.charAt(0)) + section.substring(1), v);
+		});
 		conf.set("Processors", processors);
 		conf.set("Players", Util.toStringSet(players));
 		conf.set("Muted", Util.toStringSet(muted));

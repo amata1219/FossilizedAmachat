@@ -50,6 +50,7 @@ public class ActionBot implements Bot, AmachatMessageEventListener4Bot {
 		Configuration conf = bot.config.getConfig();
 		bot.chats = config.getLongSet("Chats");
 		conf.getStringList("Actions").forEach(action -> bot.actions.add(Action.decode(action)));
+		bot.load();
 		return bot;
 	}
 

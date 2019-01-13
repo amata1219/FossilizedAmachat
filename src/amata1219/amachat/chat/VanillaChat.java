@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,7 +16,9 @@ import amata1219.amachat.event.AmachatBroadcastEvent;
 import amata1219.amachat.event.AmachatMessageEvent;
 import amata1219.amachat.player.Player;
 import amata1219.amachat.prefix.PrefixManager;
+import amata1219.amachat.processor.Coloring;
 import amata1219.amachat.processor.FormatType;
+import amata1219.amachat.processor.Processor;
 import amata1219.amachat.processor.ProcessorManager;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.config.Configuration;
@@ -39,7 +42,13 @@ public class VanillaChat implements Chat {
 	public static VanillaChat load(){
 		VanillaChat chat = new VanillaChat();
 		Config config = chat.config = Config.load(new File(Chat.DIRECTORY, "vanilla.yml"), "chat.yml");
-		chat.chat = config.getConfig().getBoolean("CanChat");
+		Configuration conf = chat.config.getConfig();
+		chat.chat = conf.getBoolean("CanChat");
+		Map<FormatType, String> formats = chat.formats;
+		Processor coloring = ProcessorManager.get(Coloring.NAME);
+		formats.put(FormatType.NORMAL, coloring.process(conf.getString("Format.Normal")));
+		formats.put(FormatType.JAPANIZED, coloring.process(conf.getString("Format.Japanized")));
+		formats.put(FormatType.TRANSLATION, coloring.process(conf.getString("Format.Translation")));
 		chat.processors = new HashSet<>(config.getConfig().getStringList("Processors"));
 		chat.players = config.getUniqueIdSet("Players");
 		chat.muted = config.getUniqueIdSet("Muted");
@@ -50,6 +59,10 @@ public class VanillaChat implements Chat {
 	public void save(){
 		Configuration conf = config.getConfig();
 		conf.set("CanChat", chat);
+		formats.forEach((k, v) -> {
+			String section = k.name();
+			conf.set(Character.toUpperCase(section.charAt(0)) + section.substring(1), v);
+		});
 		conf.set("Processors", processors);
 		conf.set("Players", Util.toStringSet(players));
 		conf.set("Muted", Util.toStringSet(muted));
