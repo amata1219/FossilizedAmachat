@@ -12,13 +12,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import amata1219.amachat.Config;
-import amata1219.amachat.Initializer;
+import amata1219.amachat.bot.event.ChatEvent4Bot;
+import amata1219.amachat.bot.event.ChatListener4Bot;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
+import amata1219.amachat.config.Config;
+import amata1219.amachat.config.Initializer;
 import net.md_5.bungee.config.Configuration;
 
-public class ActionBot implements Bot, AmachatMessageEventListener4Bot {
+public class ActionBot implements Bot, ChatListener4Bot {
 
 	public static final String NAME = "ActionBot";
 	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "ActionBots");
@@ -39,7 +41,7 @@ public class ActionBot implements Bot, AmachatMessageEventListener4Bot {
 
 			@Override
 			public void initialize(Config config) {
-				Configuration conf = config.getConfig();
+				Configuration conf = config.getConfiguration();
 				conf.set("Chats", Collections.emptySet());
 				conf.set("Actions", Collections.emptySet());
 				config.apply();
@@ -47,7 +49,7 @@ public class ActionBot implements Bot, AmachatMessageEventListener4Bot {
 
 		});
 
-		Configuration conf = bot.config.getConfig();
+		Configuration conf = bot.config.getConfiguration();
 		bot.chats = config.getLongSet("Chats");
 		conf.getStringList("Actions").forEach(action -> bot.actions.add(Action.decode(action)));
 		bot.load();
@@ -55,7 +57,7 @@ public class ActionBot implements Bot, AmachatMessageEventListener4Bot {
 	}
 
 	public void save(){
-		Configuration conf = config.getConfig();
+		Configuration conf = config.getConfiguration();
 		conf.set("Chats", chats);
 		Set<String> data = new HashSet<>();
 		actions.forEach(action -> data.add(Action.encode(action)));
@@ -123,12 +125,12 @@ public class ActionBot implements Bot, AmachatMessageEventListener4Bot {
 			return null;
 		}
 
-		void done(AmachatMessageEvent4Bot event);
+		void done(ChatEvent4Bot event);
 
 	}
 
 	@Override
-	public void onChatMessageReceived(AmachatMessageEvent4Bot event) {
+	public void onChatMessageReceived(ChatEvent4Bot event) {
 		if(event.isCancelled())
 			return;
 

@@ -1,4 +1,4 @@
-package amata1219.amachat;
+package amata1219.amachat.config;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,6 +11,8 @@ import java.util.UUID;
 
 import com.google.common.io.ByteStreams;
 
+import amata1219.amachat.Amachat;
+import amata1219.amachat.Util;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
@@ -63,7 +65,7 @@ public class Config{
 		return config;
 	}
 
-	public Configuration getConfig(){
+	public Configuration getConfiguration(){
 		return config;
 	}
 

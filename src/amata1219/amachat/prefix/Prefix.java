@@ -2,12 +2,20 @@ package amata1219.amachat.prefix;
 
 import amata1219.amachat.chat.Chat;
 
-public interface Prefix extends Chat{
+public abstract class Prefix extends Chat {
 
-	boolean hasPrefix();
+	protected String prefix;
 
-	String getPrefix();
+	public boolean hasPrefix(){
+		return prefix != null;
+	}
 
-	void setPrefix(String prefix);
+	public String getPrefix(){
+		return prefix;
+	}
+
+	public void setPrefix(String prefix){
+		this.prefix = prefix;
+	}
 
 }

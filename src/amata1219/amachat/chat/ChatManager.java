@@ -6,30 +6,17 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import amata1219.amachat.Logger;
-import amata1219.amachat.player.Player;
-import amata1219.amachat.player.PlayerManager;
+import amata1219.amachat.Amachat;
+import amata1219.amachat.user.User;
+import amata1219.amachat.user.UserManager;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class ChatManager {
 
-	private static ChatManager instance;
-
 	private static final HashMap<String, Chat> REGISTRY = new HashMap<>();
-	private final HashMap<Long, Chat> map = new HashMap<>();
-
-	private ChatManager(){
-
-	}
+	private static final HashMap<Long, Chat> CHAT = new HashMap<>();
 
 	public static void load(){
-		ChatManager manager = new ChatManager();
-
-		instance = manager;
-	}
-
-	public static ChatManager getInstance(){
-		return instance;
 	}
 
 	public static void register(Chat chat){
@@ -44,48 +31,44 @@ public class ChatManager {
 		return REGISTRY.get(chatName);
 	}
 
-	public Chat getChat(long id){
-		return map.get(id);
+	public static Chat getChat(long id){
+		return CHAT.get(id);
 	}
 
-	public Collection<Chat> getChats(){
-		return map.values();
+	public static Collection<Chat> getChats(){
+		return CHAT.values();
 	}
 
-	public Set<Chat> getChats(Set<Long> ids){
+	public static Set<Chat> getChat(Set<Long> ids){
 		Set<Chat> chats = new HashSet<>();
-		map.keySet().stream().filter(key -> ids.contains(key)).forEach(key -> chats.add(map.get(key)));
+		CHAT.keySet().stream().filter(key -> ids.contains(key)).forEach(key -> chats.add(CHAT.get(key)));
 		return chats;
 	}
 
-	public void addChat(long id, Chat chat){
-		map.put(id, chat);
+	public static void addChat(long id, Chat chat){
+		CHAT.put(id, chat);
 	}
 
-	public void removeChat(long id){
-		map.remove(id);
+	public static void removeChat(long id){
+		CHAT.remove(id);
 	}
 
-	public static void sendMessage(String message, UUID uuid){
+	public static void sendMessage(UUID uuid, String message, boolean logging){
+		if(logging)
+			Amachat.info(message);
+
 		TextComponent component = new TextComponent(message);
-		Player player = PlayerManager.getInstance().getPlayer(uuid);
+		User player = UserManager.getInstance().getPlayer(uuid);
 		if(player != null)
-			player.send(component);
+			player.sendMessage(component);
 	}
 
-	public static void sendMessageAndLog(String message, UUID uuid){
-		Logger.info(message);
-		sendMessageAndLog(message, uuid);
-	}
+	public static void sendMessage(Set<UUID> uuids, String message, boolean logging){
+		if(logging)
+			Amachat.info(message);
 
-	public static void sendMessage(String message, Set<UUID> uuids){
 		TextComponent component = new TextComponent(message);
-		PlayerManager.getInstance().getPlayers(uuids).forEach(player -> player.send(component));
-	}
-
-	public static void sendMessageAndLog(String message, Set<UUID> uuids){
-		Logger.info(message);
-		sendMessageAndLog(message, uuids);
+		UserManager.getInstance().getPlayers(uuids).forEach(player -> player.sendMessage(component));
 	}
 
 }

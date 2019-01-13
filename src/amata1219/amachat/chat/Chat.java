@@ -1,70 +1,170 @@
 package amata1219.amachat.chat;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import amata1219.amachat.Config;
-import amata1219.amachat.player.Player;
+import amata1219.amachat.Amachat;
+import amata1219.amachat.bot.event.ChatEvent4Bot;
+import amata1219.amachat.config.Config;
+import amata1219.amachat.event.ChatEvent;
+import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.FormatType;
+import amata1219.amachat.processor.ProcessorManager;
+import amata1219.amachat.user.User;
 import net.md_5.bungee.BungeeCord;
 
-public interface Chat {
+public abstract class Chat {
 
-	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Chat");
+	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "ChatData");
 
-	String getName();
+	protected long id;
+	protected Config config;
+	protected boolean chat;
+	protected Map<FormatType, String> formats = new HashMap<>();
+	protected Set<String> processorNames;
+	protected Set<UUID> users, mutedUsers, bannedUsers;
+	protected String joinMessage, quitMessage;
 
-	long getId();
+	public String getName(){
+		return null;
+	}
 
-	void save();
+	public long getId(){
+		return id;
+	}
 
-	void chat(Player player, String message);
+	public void save(){
+		//フィールド書き換え時
+	}
 
-	void broadcast(String message);
+	public void reload(){
+		//コンフィグファイル書き換え時
+	}
 
-	Config getConfig();
+	public void chat(User user, String message){
+		UUID uuid = user.getUniqueId();
 
-	boolean canChat();
+		Chat match = PrefixManager.matchChat(message);
+		if(match != null && match.isJoin(uuid)){
+			match.chat(user, message);
+			return;
+		}
 
-	void setChat(boolean chat);
+		if(isMuted(uuid)){
+			Amachat.quietInfo("Muted-" + message);
+			return;
+		}
 
-	String getFormat(FormatType type);
+		ChatEvent4Bot event4Bot = ChatEvent4Bot.call(this, user, message);
+		message = event4Bot.getMessage();
+		if(event4Bot.isCancelled()){
+			Amachat.quietInfo("Cancelled-" + message);
+			return;
+		}
 
-	void setFormat(FormatType type, String format);
+		ChatEvent event = ChatEvent.call(this, user, message);
+		message = event.getMessage();
+		if(event.isCancelled()){
+			Amachat.quietInfo("Cancelled-" + message);
+			return;
+		}
 
-	Set<String> getProcessors();
+		ChatManager.sendMessage(users, ProcessorManager.processAll(user, message, formats, processorNames), true);
+	}
 
-	boolean hasProcessor(String processorName);
+	public void broadcast(String message){
 
-	void addProcessor(String processorName);
+	}
 
-	void removeProcessor(String processorName);
+	public Config getConfig(){
+		return config;
+	}
 
-	Set<UUID> getPlayers();
+	public boolean canChat(){
+		return chat;
+	}
 
-	boolean isJoin(UUID uuid);
+	public void setChat(boolean chat){
+		this.chat = chat;
+	}
 
-	void join(UUID uuid);
+	public String getFormat(FormatType type){
+		return formats.get(type);
+	}
 
-	void quit(UUID uuid);
+	public void setFormat(FormatType type, String format){
+		formats.put(type, format);
+	}
 
-	void kick(UUID uuid, String reason);
+	public Set<String> getProcessors(){
+		return processorNames;
+	}
 
-	Set<UUID> getMutedPlayers();
+	public boolean hasProcessor(String processorName){
+		return processorNames.contains(processorName);
+	}
 
-	boolean isMuted(UUID uuid);
+	public void addProcessor(String processorName){
+		processorNames.add(processorName);
+	}
 
-	void mute(UUID uuid);
+	public void removeProcessor(String processorName){
+		processorNames.remove(processorName);
+	}
 
-	void unmute(UUID uuid);
+	public Set<UUID> getUsers(){
+		return users;
+	}
 
-	Set<UUID> getBannedPlayers();
+	public boolean isJoin(UUID uuid){
+		return users.contains(uuid);
+	}
 
-	boolean isBanned(UUID uuid);
+	public void join(UUID uuid){
 
-	void ban(UUID uuid);
+	}
 
-	void unban(UUID uuid);
+	public void quit(UUID uuid){
+
+	}
+
+	public void kick(UUID uuid, String reason){
+
+	}
+
+	public Set<UUID> getMutedUsers(){
+		return mutedUsers;
+	}
+
+	public boolean isMuted(UUID uuid){
+		return mutedUsers.contains(uuid);
+	}
+
+	public void mute(UUID uuid){
+
+	}
+
+	public void unmute(UUID uuid, String reason){
+
+	}
+
+	public Set<UUID> getBannedUsers(){
+		return bannedUsers;
+	}
+
+	public boolean isBanned(UUID uuid){
+		return bannedUsers.contains(uuid);
+	}
+
+	public void ban(UUID uuid, String reason){
+
+	}
+
+	public void unban(UUID uuid){
+
+	}
 
 }

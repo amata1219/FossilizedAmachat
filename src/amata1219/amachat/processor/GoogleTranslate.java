@@ -26,7 +26,7 @@ public class GoogleTranslate implements Processor {
 	public static GoogleTranslate load(){
 		GoogleTranslate api = new GoogleTranslate();
 
-		Configuration config = Amachat.getPlugin().getConfig().getConfig().getSection("GoogleTranslate");
+		Configuration config = Amachat.getPlugin().getConfig().getConfiguration().getSection("GoogleTranslate");
 		if(!config.getBoolean("Enable"))
 			return null;
 

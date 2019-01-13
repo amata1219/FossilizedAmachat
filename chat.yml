@@ -1,9 +1,13 @@
 Version: 0.0
+ID: -1
 CanChat: true
-Format:
+JoinMessage: ''
+QuitMessage: ''
+Formats:
   Normal: '[player]&a:&r [message]'
   Japanized: '[player]&a:&r [japanized]&7([message])'
   Translation: '[player]&a:&r [translation]&7([message])'
 Processors: []
-Players: []
-Muted: []
+Users: []
+MutedUsers: []
+BannedUsers: []

@@ -6,14 +6,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import amata1219.amachat.Config;
-import amata1219.amachat.Initializer;
 import amata1219.amachat.Util;
+import amata1219.amachat.bot.event.ChatEvent4Bot;
+import amata1219.amachat.bot.event.ChatListener4Bot;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
+import amata1219.amachat.config.Config;
+import amata1219.amachat.config.Initializer;
 import net.md_5.bungee.config.Configuration;
 
-public class ChatBot implements Bot, AmachatMessageEventListener4Bot {
+public class ChatBot implements Bot, ChatListener4Bot {
 
 	public static final String NAME = "ChatBot";
 	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "ChatBot");
@@ -34,14 +36,14 @@ public class ChatBot implements Bot, AmachatMessageEventListener4Bot {
 
 			@Override
 			public void initialize(Config config) {
-				Configuration conf = config.getConfig();
+				Configuration conf = config.getConfiguration();
 				conf.set("Chats", Collections.emptySet());
 				config.apply();
 			}
 
 		});
 
-		Configuration conf = bot.config.getConfig();
+		Configuration conf = bot.config.getConfiguration();
 		bot.chats = config.getLongSet("Chats");
 		Configuration section = conf.getSection("Responces");
 		section.getKeys().forEach(responce -> bot.responces.put(responce, section.getString(responce)));
@@ -50,7 +52,7 @@ public class ChatBot implements Bot, AmachatMessageEventListener4Bot {
 	}
 
 	public void save(){
-		Configuration conf = config.getConfig();
+		Configuration conf = config.getConfiguration();
 		conf.set("Chats", chats);
 		conf.set("Responces", null);
 		responces.forEach((k, v) -> conf.set("Responces." + k, v));
@@ -117,7 +119,7 @@ public class ChatBot implements Bot, AmachatMessageEventListener4Bot {
 	}
 
 	@Override
-	public void onChatMessageReceived(AmachatMessageEvent4Bot event) {
+	public void onChatMessageReceived(ChatEvent4Bot event) {
 		if(event.isCancelled())
 			return;
 
@@ -133,13 +135,13 @@ public class ChatBot implements Bot, AmachatMessageEventListener4Bot {
 			//! - send to player
 			String replaced = replaceHolders(responces.get(keyword), event);
 			if(replaced.indexOf("!") == 1)
-				event.getPlayer().send(Util.toTextComponent(replaced));
+				event.getPlayer().sendMessage(Util.toTextComponent(replaced));
 			else
 				chat.broadcast(replaced);
 		}
 	}
 
-	public String replaceHolders(String message, AmachatMessageEvent4Bot event){
+	public String replaceHolders(String message, ChatEvent4Bot event){
 		return message.replace("[player]", event.getPlayer().getPlayer().getName());
 	}
 

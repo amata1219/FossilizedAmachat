@@ -3,8 +3,8 @@ package amata1219.amachat.bot;
 import java.io.File;
 import java.util.Set;
 
-import amata1219.amachat.Config;
 import amata1219.amachat.chat.Chat;
+import amata1219.amachat.config.Config;
 import net.md_5.bungee.BungeeCord;
 
 public interface Bot {

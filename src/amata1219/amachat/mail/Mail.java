@@ -1,56 +1,38 @@
 package amata1219.amachat.mail;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
-import amata1219.amachat.chat.ChatManager;
-import amata1219.amachat.player.Player;
 import net.md_5.bungee.config.Configuration;
 
-public class Mail {
+public class Mail extends AbstractMail {
 
-	private UUID receiver;
-	private String text;
-	private long timestamp;
-
-	private Mail(){
-
+	private Mail(long timestamp){
+		this.timestamp = timestamp;
 	}
 
-	public static Mail send(Player sender, UUID receiver, String text){
-		Mail mail = new Mail();
+	public static Mail write(UUID sender, UUID receiver, String text){
+		Mail mail = new Mail(System.currentTimeMillis());
+		mail.sender = sender;
 		mail.receiver = receiver;
-		mail.text = MailManager.process(sender, mail);
-		mail.timestamp = System.currentTimeMillis();
+		mail.text = text;
 		return mail;
 	}
 
-	public static Mail load(Configuration config, String key){
-		Mail mail = new Mail();
-		mail.receiver = UUID.fromString(config.getString(key + ".Receiver"));
-		mail.text = config.getString(key + ".Text");
-		mail.timestamp = Long.valueOf(key).longValue();
-		return mail;
+	public static Set<Mail> load(Configuration section){
+		Set<Mail> set = new HashSet<Mail>();
+		section.getKeys().forEach(key -> {
+			Mail mail = new Mail(Long.valueOf(key).longValue());
+			mail.sender = UUID.fromString(section.getString(key + ".Sender"));
+			mail.receiver = UUID.fromString(section.getString(key + ".Receiver"));
+			mail.text = section.getString(key + ".Text");
+		});
+		return set;
 	}
 
-	public void send(){
-		ChatManager.sendMessage("", receiver);
-		ChatManager.sendMessage(text, receiver);
-	}
-
-	public UUID getReceiver(){
-		return receiver;
-	}
-
-	public String getText(){
-		return text;
-	}
-
-	public void setText(String text){
-		this.text = text;
-	}
-
-	public long getTimestamp(){
-		return timestamp;
+	@Override
+	public void send() {
 	}
 
 }

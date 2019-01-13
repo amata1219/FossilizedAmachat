@@ -91,7 +91,7 @@ public class GoogleIME implements Processor {
 	public static GoogleIME load(){
 		GoogleIME ime = new GoogleIME();
 
-		Configuration config = Amachat.getPlugin().getConfig().getConfig().getSection("GoogleIME");
+		Configuration config = Amachat.getPlugin().getConfig().getConfiguration().getSection("GoogleIME");
 		if(!config.getBoolean("Enable"))
 			return null;
 

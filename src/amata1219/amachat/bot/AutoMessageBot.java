@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import amata1219.amachat.Amachat;
-import amata1219.amachat.Config;
-import amata1219.amachat.Initializer;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
+import amata1219.amachat.config.Config;
+import amata1219.amachat.config.Initializer;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
@@ -40,7 +40,7 @@ public class AutoMessageBot implements TaskBot {
 
 			@Override
 			public void initialize(Config config) {
-				Configuration conf = config.getConfig();
+				Configuration conf = config.getConfiguration();
 				conf.set("Chats", Collections.emptySet());
 				conf.set("Messages", Collections.emptySet());
 				conf.set("Interval", 300);
@@ -49,7 +49,7 @@ public class AutoMessageBot implements TaskBot {
 
 		});
 
-		Configuration conf = bot.config.getConfig();
+		Configuration conf = bot.config.getConfiguration();
 		bot.chats = config.getLongSet("Chats");
 		bot.messages = conf.getStringList("Messages");
 		return bot;
@@ -107,11 +107,11 @@ public class AutoMessageBot implements TaskBot {
 	}
 
 	public int getInterval(){
-		return config.getConfig().getInt("Interval");
+		return config.getConfiguration().getInt("Interval");
 	}
 
 	public void setInterval(int interval){
-		config.getConfig().set("Interval", interval);
+		config.getConfiguration().set("Interval", interval);
 		start();
 	}
 

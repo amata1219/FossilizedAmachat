@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import amata1219.amachat.player.Player;
+import amata1219.amachat.user.User;
 
 public class ProcessorManager {
 
@@ -48,7 +48,7 @@ public class ProcessorManager {
 		return REGISTRY.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toSet());
 	}
 
-	public static String processAll(Player player, String text, Map<FormatType, String> formats, Set<String> processorNames){
+	public static String processAll(User player, String text, Map<FormatType, String> formats, Set<String> processorNames){
 		String message = text;
 		if(processorNames.contains(Coloring.NAME))
 			message = get(Coloring.NAME).process(message);

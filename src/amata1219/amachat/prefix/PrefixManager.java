@@ -5,40 +5,28 @@ import java.util.Set;
 
 public class PrefixManager {
 
-	private static PrefixManager instance;
-
-	private final Set<Prefix> prefixes = new HashSet<>();
+	private static final Set<Prefix> PREFIXES = new HashSet<>();
 
 	private PrefixManager(){
 
 	}
 
-	public static void load(){
-		PrefixManager manager = new PrefixManager();
-
-		instance = manager;
+	public static Set<Prefix> getPrefixes(){
+		return PREFIXES;
 	}
 
-	public static PrefixManager getInstance(){
-		return instance;
+	public static void addPrefix(Prefix prefix){
+		PREFIXES.add(prefix);
 	}
 
-	public Set<Prefix> getPrefixes(){
-		return prefixes;
-	}
-
-	public void addPrefix(Prefix prefix){
-		prefixes.add(prefix);
-	}
-
-	public void removePrefix(Prefix prefix){
-		prefixes.remove(prefix);
+	public static void removePrefix(Prefix prefix){
+		PREFIXES.remove(prefix);
 	}
 
 	public static Prefix matchChat(String message){
 		int length = message.length();
 
-		for(Prefix prefix : instance.prefixes){
+		for(Prefix prefix : PREFIXES){
 			String s = prefix.getPrefix();
 			if(length > s.length() && message.startsWith(s))
 				return prefix;
