@@ -26,11 +26,11 @@ public class GoogleTranslate implements Processor {
 	public static GoogleTranslate load(){
 		GoogleTranslate api = new GoogleTranslate();
 
-		Configuration config = Amachat.getPlugin().getConfig().getConfiguration().getSection("GoogleTranslate");
-		if(!config.getBoolean("Enable"))
+		Configuration configuration = Amachat.getConfig().getConfiguration().getSection("GoogleTranslate");
+		if(!configuration.getBoolean("Enable"))
 			return null;
 
-		api.url = config.getString("ScriptURL") + "/exec?text=$1&source=&target=$2";
+		api.url = configuration.getString("ScriptURL") + "/exec?text=$1&source=&target=$2";
 
 		if(!api.checkTranslate())
 			return null;
@@ -40,7 +40,7 @@ public class GoogleTranslate implements Processor {
 
 	@Override
 	public String getName() {
-		return NAME;
+		return GoogleTranslate.NAME;
 	}
 
 	@Override
@@ -57,7 +57,7 @@ public class GoogleTranslate implements Processor {
 	}
 
 	public boolean checkTranslate(){
-		return translate("Enabled Google Translate", LanguageCode.JA) != null;
+		return translate("Hello", LanguageCode.JA) != null;
 	}
 
 	public String translate(String text, LanguageCode target){
@@ -69,21 +69,26 @@ public class GoogleTranslate implements Processor {
 		StringBuilder builder = new StringBuilder();
 		try{
 			URL url = new URL(this.url.replace("$2", target.name()).replace("$1", URLEncoder.encode(text, "UTF-8")));
+
 			con = (HttpURLConnection) url.openConnection();
+
 			con.setRequestMethod("GET");
 			con.setInstanceFollowRedirects(true);
+
 			con.connect();
+
 			reader = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
 			String line = "";
 			while((line = reader.readLine()) != null)
 				builder.append(line);
+
 			return builder.toString();
 		}catch(MalformedURLException e){
-			return "";
+			return text;
 		}catch(ProtocolException e){
-			return "";
+			return text;
 		}catch(IOException e){
-			return "";
+			return text;
 		}finally{
 			if(con != null)
 				con.disconnect();

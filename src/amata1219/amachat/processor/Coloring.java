@@ -8,7 +8,7 @@ public class Coloring implements Processor {
 
 	@Override
 	public String getName() {
-		return NAME;
+		return Coloring.NAME;
 	}
 
 	@Override

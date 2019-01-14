@@ -22,11 +22,9 @@ import net.md_5.bungee.event.EventHandler;
 
 public class UserManager implements Listener {
 
-	private static UserManager instance;
-
-	private final Map<UUID, User> players = new HashMap<>();
-	private Config config;
-	private BiMap<UUID, String> cache = HashBiMap.create();
+	private static final Map<UUID, User> players = new HashMap<>();
+	private static Config config;
+	private static final BiMap<UUID, String> cache = HashBiMap.create();
 
 	private UserManager(){
 
@@ -38,23 +36,16 @@ public class UserManager implements Listener {
 		Amachat plugin = Amachat.getPlugin();
 		plugin.getProxy().getPluginManager().registerListener(plugin, manager);
 
-		manager.config = Config.load(new File(Amachat.getPlugin().getDataFolder(), "players.yml"), "players.yml");
-		Configuration conf = manager.config.getConfiguration();
-		conf.getKeys().forEach(uuid -> manager.cache.put(UUID.fromString(uuid), conf.getString(uuid)));
-
-		instance = manager;
+		Configuration configuration = (config = Config.load(new File(Amachat.getPlugin().getDataFolder(), "players.yml"), "players.yml")).getConfiguration();
+		configuration.getKeys().forEach(uuid -> cache.put(UUID.fromString(uuid), configuration.getString(uuid)));
 	}
 
-	public void unload(){
+	public static void unload(){
 		cache.forEach((k, v) -> config.getConfiguration().set(k.toString(), v));
 		config.apply();
 	}
 
-	public static UserManager getInstance(){
-		return instance;
-	}
-
-	public Config getConfig(){
+	public static Config getConfig(){
 		return config;
 	}
 
@@ -80,19 +71,19 @@ public class UserManager implements Listener {
 		Amachat.chat((ProxiedPlayer) e.getSender(), e.getMessage());
 	}
 
-	public User getPlayer(UUID uuid){
+	public static User getUser(UUID uuid){
 		return players.get(uuid);
 	}
 
-	public Set<User> getPlayers(){
+	public static Set<User> getUsers(){
 		return players.values().stream().collect(Collectors.toSet());
 	}
 
-	public Set<User> getPlayers(Set<UUID> uuids){
-		return players.values().stream().filter(player -> uuids.contains(player.getUniqueId())).collect(Collectors.toSet());
+	public static Set<User> getUsersByUniqueIdSet(Set<UUID> uuidSet){
+		return players.values().stream().filter(player -> uuidSet.contains(player.getUniqueId())).collect(Collectors.toSet());
 	}
 
-	public boolean fix(ProxiedPlayer player){
+	public static boolean fix(ProxiedPlayer player){
 		if(player == null || !player.isConnected())
 			return false;
 
@@ -105,19 +96,19 @@ public class UserManager implements Listener {
 	}
 
 	public static boolean isExist(String playerName){
-		return instance.cache.inverse().containsKey(playerName);
+		return cache.inverse().containsKey(playerName);
 	}
 
 	public static boolean isExist(UUID uuid){
-		return instance.cache.containsKey(uuid);
+		return cache.containsKey(uuid);
 	}
 
 	public static UUID getUniqueId(String playerName){
-		return instance.cache.inverse().get(playerName);
+		return cache.inverse().get(playerName);
 	}
 
 	public static String getPlayerName(UUID uuid){
-		return instance.cache.get(uuid);
+		return cache.get(uuid);
 	}
 
 }

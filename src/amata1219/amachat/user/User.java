@@ -7,6 +7,8 @@ import java.util.UUID;
 import amata1219.amachat.Amachat;
 import amata1219.amachat.Util;
 import amata1219.amachat.chat.Chat;
+import amata1219.amachat.chat.ChatManager;
+import amata1219.amachat.chat.VanillaChat;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
 import net.md_5.bungee.BungeeCord;
@@ -93,6 +95,10 @@ public class User {
 		toProxiedPlayer().sendMessage(component);
 	}
 
+	public void sendMessage(String message){
+		sendMessage(Util.toTextComponent(message));
+	}
+
 	public boolean isMuted(){
 		return mute;
 	}
@@ -134,7 +140,12 @@ public class User {
 	}
 
 	public Chat getAddress(){
-		return null;
+		Chat chat = ChatManager.getChat(address);
+		return chat == null ? ChatManager.getChat(VanillaChat.ID) : chat;
+	}
+
+	public void setAddress(Chat chat){
+		address = chat.getId();
 	}
 
 	public void removeAddress(){

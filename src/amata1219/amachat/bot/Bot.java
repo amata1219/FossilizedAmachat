@@ -3,26 +3,67 @@ package amata1219.amachat.bot;
 import java.io.File;
 import java.util.Set;
 
+import amata1219.amachat.Amachat;
 import amata1219.amachat.chat.Chat;
+import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.config.Config;
-import net.md_5.bungee.BungeeCord;
 
-public interface Bot {
+public abstract class Bot {
 
-	static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Bots");
+	public static final File DIRECTORY = new File(Amachat.getPlugin().getDataFolder() + File.separator + "BotData");
 
-	String getName();
+	protected long id;
+	protected Config config;
+	protected Set<Long> chatIdSet;
 
-	long getId();
+	public abstract String getName();
 
-	Config getConfig();
+	public long getId(){
+		return id;
+	}
 
-	Set<Chat> getJoinedChats();
+	public void save(){
 
-	boolean isJoined(long id);
+	}
 
-	void joinChat(long id);
+	public void reload(){
 
-	void quitChat(long id);
+	}
+
+	public Config getConfig(){
+		return config;
+	}
+
+	public Set<Chat> getJoinedChatSet(){
+		return ChatManager.getChat(chatIdSet);
+	}
+
+	public boolean isJoined(Chat chat){
+		return isJoined(chat.getId());
+	}
+
+	public void joinChat(Chat chat){
+		joinChat(chat.getId());
+	}
+
+	public void quitChat(Chat chat){
+		quitChat(chat.getId());
+	}
+
+	public boolean isJoined(long id){
+		return chatIdSet.contains(id);
+	}
+
+	public void joinChat(long id){
+		chatIdSet.add(id);
+	}
+
+	public void quitChat(long id){
+		chatIdSet.remove(id);
+	}
+
+	public void clearChat(){
+		chatIdSet.clear();
+	}
 
 }

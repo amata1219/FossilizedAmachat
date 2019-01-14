@@ -7,25 +7,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import amata1219.amachat.user.User;
+import amata1219.amachat.user.UserManager;
 
 public class ProcessorManager {
-
-	private static ProcessorManager instance;
 
 	private static final Map<String, Processor> REGISTRY = new HashMap<>();
 
 	private ProcessorManager(){
 
-	}
-
-	public static void load(){
-		ProcessorManager manager = new ProcessorManager();
-
-		instance = manager;
-	}
-
-	public static ProcessorManager getInstance(){
-		return instance;
 	}
 
 	public static void register(Processor processor){
@@ -48,13 +37,17 @@ public class ProcessorManager {
 		return REGISTRY.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toSet());
 	}
 
-	public static String processAll(User player, String text, Map<FormatType, String> formats, Set<String> processorNames){
+	public static String process(User speaker, String text, Map<FormatType, String> formats, Set<String> processorNames){
+		return process(UserManager.getPlayerName(speaker.getUniqueId()), text, formats, processorNames);
+	}
+
+	public static String process(String playerName, String text, Map<FormatType, String> formats, Set<String> processorNames){
 		String message = text;
 		if(processorNames.contains(Coloring.NAME))
 			message = get(Coloring.NAME).process(message);
 
 		FormatType type = FormatType.NORMAL;
-		if(processorNames.contains(GoogleIME.NAME) && GoogleIME.canConvert(text))
+		if(processorNames.contains(GoogleIME.NAME) && GoogleIME.canJapanize(text))
 			type = FormatType.JAPANIZED;
 		else if(processorNames.contains(GoogleTranslate.NAME) && GoogleTranslate.canTranslate(text))
 			type = FormatType.TRANSLATION;
@@ -62,7 +55,7 @@ public class ProcessorManager {
 		for(Processor processor : get(processorNames))
 			message = processor.process(message);
 
-		String format = formats.get(type).replace("[player]", player.getName());
+		String format = formats.get(type).replace("[player]", playerName);
 		switch(type){
 		case NORMAL:
 			return format.replace("[message]", message);

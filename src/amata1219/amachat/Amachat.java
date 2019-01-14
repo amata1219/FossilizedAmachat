@@ -27,6 +27,7 @@ public class Amachat extends Plugin {
 		 * ChatManager
 		 * BotManager
 		 * PlayerManager
+		 * MailManager
 		 */
 	}
 
@@ -47,9 +48,8 @@ public class Amachat extends Plugin {
 		if(sender == null || message == null)
 			return;
 
-		UserManager manager = UserManager.getInstance();
-		final User player = manager.getPlayer(sender.getUniqueId());
-		if(player == null && !manager.fix(sender))
+		final User player = UserManager.getUser(sender.getUniqueId());
+		if(player == null && !UserManager.fix(sender))
 			return;
 
 		Amachat.getPlugin().getExecutorService().execute(new Runnable(){

@@ -20,7 +20,7 @@ public class ChatBot implements Bot, ChatListener4Bot {
 	public static final String NAME = "ChatBot";
 	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "ChatBot");
 
-	private final long id;
+	private long id;
 	private Config config;
 	private Set<Long> chats;
 	private HashMap<String, String> responces = new HashMap<>();

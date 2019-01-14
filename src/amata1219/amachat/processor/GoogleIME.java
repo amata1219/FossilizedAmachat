@@ -91,7 +91,7 @@ public class GoogleIME implements Processor {
 	public static GoogleIME load(){
 		GoogleIME ime = new GoogleIME();
 
-		Configuration config = Amachat.getPlugin().getConfig().getConfiguration().getSection("GoogleIME");
+		Configuration config = Amachat.getConfig().getConfiguration().getSection("GoogleIME");
 		if(!config.getBoolean("Enable"))
 			return null;
 
@@ -105,17 +105,18 @@ public class GoogleIME implements Processor {
 
 	@Override
 	public String process(String text) {
-		if(!canConvert(text))
-			return text;
-
-		return GoogleIME.convert(text);
+		return japanize(text);
 	}
 
-	public static boolean canConvert(String text){
+	public static boolean canJapanize(String text){
 		return text.length() == text.getBytes().length;
 	}
 
-	public static String convert(String text){
+	public boolean checkJapanize(){
+		return japanize("konnnitiha") != null;
+	}
+
+	public String japanize(String text){
 		StringBuilder builder = new StringBuilder();
 		String line = "";
 		for(int i = 0; i < text.length(); i++){

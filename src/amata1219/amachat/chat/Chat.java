@@ -9,12 +9,14 @@ import java.util.UUID;
 import amata1219.amachat.Amachat;
 import amata1219.amachat.bot.event.ChatEvent4Bot;
 import amata1219.amachat.config.Config;
+import amata1219.amachat.event.BroadcastEvent;
 import amata1219.amachat.event.ChatEvent;
 import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.User;
 import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.config.Configuration;
 
 public abstract class Chat {
 
@@ -28,9 +30,7 @@ public abstract class Chat {
 	protected Set<UUID> users, mutedUsers, bannedUsers;
 	protected String joinMessage, quitMessage;
 
-	public String getName(){
-		return null;
-	}
+	public abstract String getName();
 
 	public long getId(){
 		return id;
@@ -38,10 +38,48 @@ public abstract class Chat {
 
 	public void save(){
 		//フィールド書き換え時
+		if(config == null)
+			return;
+
+		Configuration configuration = config.getConfiguration();
+
+		configuration.set("CanChat", chat);
+		configuration.set("JoinMessage", joinMessage);
+		configuration.set("QuitMessage", quitMessage);
+
+		formats.forEach((k, v) -> {
+			String type = k.name();
+			configuration.set(Character.toUpperCase(type.charAt(0)) + type.substring(1), v);
+		});
+
+		configuration.set("Processors", processorNames);
+		config.set("Users", users);
+		config.set("MutedUsers", mutedUsers);
+		config.set("BannedUsers", bannedUsers);
+
+		config.apply();
 	}
 
 	public void reload(){
 		//コンフィグファイル書き換え時
+		if(config == null)
+			return;
+
+		config.reload();
+
+		Configuration configuration = config.getConfiguration();
+
+		chat = configuration.getBoolean("CanChat");
+		joinMessage = configuration.getString("JoinMessage");
+		quitMessage = configuration.getString("QuitMessage");
+
+		formats.clear();
+		configuration.getSection("Formats").getKeys().forEach(type -> formats.put(FormatType.valueOf(type.toUpperCase()), configuration.getString("Formats." + type)));
+
+		processorNames = config.getStringSet("Processors");
+		users = config.getUniqueIdSet("Users");
+		mutedUsers = config.getUniqueIdSet("MutedUsers");
+		bannedUsers = config.getUniqueIdSet("BannedUsers");
 	}
 
 	public void chat(User user, String message){
@@ -72,11 +110,17 @@ public abstract class Chat {
 			return;
 		}
 
-		ChatManager.sendMessage(users, ProcessorManager.processAll(user, message, formats, processorNames), true);
+		ChatManager.sendMessage(users, ProcessorManager.process(user, message, formats, processorNames), true);
 	}
 
 	public void broadcast(String message){
+		BroadcastEvent event = BroadcastEvent.call(this, message);
+		if(event.isCancelled()){
+			Amachat.quietInfo("Cancelled-" + event.getMessage());
+			return;
+		}
 
+		ChatManager.sendMessage(users, message, true);
 	}
 
 	public Config getConfig(){
@@ -124,15 +168,18 @@ public abstract class Chat {
 	}
 
 	public void join(UUID uuid){
-
+		users.add(uuid);
+		ChatManager.sendMessage(uuid, joinMessage, false);
 	}
 
 	public void quit(UUID uuid){
-
+		users.remove(uuid);
+		ChatManager.sendMessage(uuid, quitMessage, false);
 	}
 
 	public void kick(UUID uuid, String reason){
-
+		users.remove(uuid);
+		ChatManager.sendMessage(uuid, reason, false);
 	}
 
 	public Set<UUID> getMutedUsers(){
@@ -143,12 +190,13 @@ public abstract class Chat {
 		return mutedUsers.contains(uuid);
 	}
 
-	public void mute(UUID uuid){
-
+	public void mute(UUID uuid, String reason){
+		mutedUsers.add(uuid);
+		ChatManager.sendMessage(uuid, reason, false);
 	}
 
-	public void unmute(UUID uuid, String reason){
-
+	public void unmute(UUID uuid){
+		mutedUsers.remove(uuid);
 	}
 
 	public Set<UUID> getBannedUsers(){
@@ -160,11 +208,12 @@ public abstract class Chat {
 	}
 
 	public void ban(UUID uuid, String reason){
-
+		bannedUsers.remove(uuid);
+		ChatManager.sendMessage(uuid, reason, false);
 	}
 
 	public void unban(UUID uuid){
-
+		bannedUsers.add(uuid);
 	}
 
 }

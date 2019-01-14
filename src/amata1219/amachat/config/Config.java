@@ -22,7 +22,7 @@ public class Config{
 
 	private static final ConfigurationProvider PROVIDER = ConfigurationProvider.getProvider(YamlConfiguration.class);
 
-	private Configuration config;
+	private Configuration configuration;
 	private File file;
 
 	private Config(){
@@ -66,7 +66,7 @@ public class Config{
 	}
 
 	public Configuration getConfiguration(){
-		return config;
+		return configuration;
 	}
 
 	public boolean saveDefault(Plugin plugin, String resource){
@@ -92,7 +92,7 @@ public class Config{
 		}
 
 		try{
-            config = Config.PROVIDER.load(file);
+            configuration = Config.PROVIDER.load(file);
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -102,7 +102,7 @@ public class Config{
 
 	public void save(){
 		try{
-			Config.PROVIDER.save(config, file);
+			Config.PROVIDER.save(configuration, file);
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -110,7 +110,7 @@ public class Config{
 
 	public void reload(){
 		try{
-            config = Config.PROVIDER.load(file);
+            configuration = Config.PROVIDER.load(file);
 		}catch(IOException e){
 			e.printStackTrace();
 		}
@@ -121,25 +121,29 @@ public class Config{
 		reload();
 	}
 
+	public void set(String path, Set<UUID> uuids){
+		configuration.set(path, Util.toStringSet(uuids));
+	}
+
 	public Set<String> getStringSet(String path){
-		return Util.listToSet(config.getStringList(path));
+		return Util.listToSet(configuration.getStringList(path));
 	}
 
 	public Set<Integer> getIntegerSet(String path){
-		return Util.listToSet(config.getIntList(path));
+		return Util.listToSet(configuration.getIntList(path));
 	}
 
 	public Set<Long> getLongSet(String path){
-		return Util.listToSet(config.getLongList(path));
+		return Util.listToSet(configuration.getLongList(path));
 	}
 
 	public UUID getUniqueId(String path){
-		Object def = config.getDefault(path);
-		return UUID.fromString(config.getString(path, (def instanceof String) ? (String) def : ""));
+		Object def = configuration.getDefault(path);
+		return UUID.fromString(configuration.getString(path, (def instanceof String) ? (String) def : ""));
 	}
 
 	public Set<UUID> getUniqueIdSet(String path) {
-		Set<?> set = new HashSet<>(config.getList(path));
+		Set<?> set = new HashSet<>(configuration.getList(path));
 		Set<UUID> result = new HashSet<>();
 
 		for(Iterator<?> localIterator = set.iterator(); localIterator.hasNext();){
