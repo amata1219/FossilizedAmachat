@@ -45,6 +45,8 @@ public class ChannelChat extends Prefix {
 
 		Configuration configuration = config.getConfiguration();
 
+		configuration.set("Aliases", aliases);
+		configuration.set("Description", description);
 		configuration.set("CanChat", chat);
 		configuration.set("JoinMessage", joinMessage);
 		configuration.set("QuitMessage", quitMessage);
@@ -72,6 +74,8 @@ public class ChannelChat extends Prefix {
 
 		Configuration configuration = config.getConfiguration();
 
+		aliases = configuration.getString("Aliases");
+		description = configuration.getString("Description");
 		chat = configuration.getBoolean("CanChat");
 		joinMessage = configuration.getString("JoinMessage");
 		quitMessage = configuration.getString("QuitMessage");

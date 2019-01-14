@@ -54,6 +54,8 @@ public class PermissionChannelChat extends Permission {
 
 		Configuration configuration = config.getConfiguration();
 
+		configuration.set("Aliases", aliases);
+		configuration.set("Description", description);
 		configuration.set("CanChat", chat);
 		configuration.set("JoinMessage", joinMessage);
 		configuration.set("QuitMessage", quitMessage);
@@ -81,6 +83,8 @@ public class PermissionChannelChat extends Permission {
 
 		Configuration configuration = config.getConfiguration();
 
+		aliases = configuration.getString("Aliases");
+		description = configuration.getString("Description");
 		chat = configuration.getBoolean("CanChat");
 		joinMessage = configuration.getString("JoinMessage");
 		quitMessage = configuration.getString("QuitMessage");
@@ -97,6 +101,9 @@ public class PermissionChannelChat extends Permission {
 
 	@Override
 	public void chat(User user, String message){
+		if(!chat)
+			return;
+
 		UUID uuid = user.getUniqueId();
 
 		Chat match = PrefixManager.matchChat(message);

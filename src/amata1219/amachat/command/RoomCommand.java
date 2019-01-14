@@ -2,9 +2,9 @@ package amata1219.amachat.command;
 
 import net.md_5.bungee.api.CommandSender;
 
-public class BroadcastCommand extends Command {
+public class RoomCommand extends Command {
 
-	public BroadcastCommand(String name, String permission, String... aliases) {
+	public RoomCommand(String name, String permission, String... aliases) {
 		super(name, permission, aliases);
 	}
 
@@ -15,4 +15,5 @@ public class BroadcastCommand extends Command {
 	@Override
 	public void execute(CommandSender sender, String[] args) {
 	}
+
 }

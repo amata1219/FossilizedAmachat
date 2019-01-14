@@ -25,6 +25,7 @@ public abstract class Chat {
 
 	protected long id;
 	protected Config config;
+	protected String aliases, description;
 	protected boolean chat;
 	protected Map<FormatType, String> formats = new HashMap<>();
 	protected Set<String> processorNames;
@@ -44,6 +45,8 @@ public abstract class Chat {
 
 		Configuration configuration = config.getConfiguration();
 
+		configuration.set("Aliases", aliases);
+		configuration.set("Description", description);
 		configuration.set("CanChat", chat);
 		configuration.set("JoinMessage", joinMessage);
 		configuration.set("QuitMessage", quitMessage);
@@ -70,6 +73,8 @@ public abstract class Chat {
 
 		Configuration configuration = config.getConfiguration();
 
+		aliases = configuration.getString("Aliases");
+		description = configuration.getString("Description");
 		chat = configuration.getBoolean("CanChat");
 		joinMessage = configuration.getString("JoinMessage");
 		quitMessage = configuration.getString("QuitMessage");
@@ -84,6 +89,9 @@ public abstract class Chat {
 	}
 
 	public void chat(User user, String message){
+		if(!chat)
+			return;
+
 		UUID uuid = user.getUniqueId();
 
 		Chat match = PrefixManager.matchChat(message);
@@ -126,6 +134,22 @@ public abstract class Chat {
 
 	public Config getConfig(){
 		return config;
+	}
+
+	public String getAliases() {
+		return aliases;
+	}
+
+	public void setAliases(String aliases) {
+		this.aliases = aliases;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public boolean canChat(){

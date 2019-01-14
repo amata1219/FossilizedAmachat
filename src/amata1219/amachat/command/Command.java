@@ -2,10 +2,12 @@ package amata1219.amachat.command;
 
 import net.md_5.bungee.api.CommandSender;
 
-public interface Command {
+public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 
-	void execute(CommandSender sender, String[] args);
+	public Command(String name, String permission, String[] aliases) {
+		super(name, permission, aliases);
+	}
 
-	void complete(CommandSender sender, String[] args);
+	public abstract void complete(CommandSender sender, String[] args);
 
 }

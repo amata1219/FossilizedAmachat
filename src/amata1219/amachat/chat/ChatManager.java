@@ -22,12 +22,6 @@ public class ChatManager {
 	private static final Map<Long, Chat> CHAT_MAP = new HashMap<>();
 	//Chat#getId(), Chat
 
-	public static void load(){
-		VanillaChat.load();
-		load(ChannelChat.class);
-		load(PermissionChannelChat.class);
-	}
-
 	public static void load(Class<?> clazz){
 		Method load = null;
 		Method listFiles = null;
@@ -51,7 +45,7 @@ public class ChatManager {
 					continue;
 
 				long id = Util.getId(fileName);
-				ChatManager.registerChat(id, (Chat) load.invoke(null, id));
+				registerChat(id, (Chat) load.invoke(null, id));
 			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
@@ -60,6 +54,15 @@ public class ChatManager {
 
 	public static Chat getChat(long id){
 		return CHAT_MAP.get(id);
+	}
+
+	public static Chat getChat(String aliases){
+		for(Chat chat : CHAT_MAP.values()){
+			if(aliases.equals(chat.getAliases()))
+				return chat;
+		}
+
+		return null;
 	}
 
 	public static Collection<Chat> getChatCollection(){

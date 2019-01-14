@@ -54,4 +54,15 @@ public class Util {
 		return args;
 	}
 
+	public static String[] toArgs(List<String> suggestions){
+		suggestions.remove(0);
+
+		int size = suggestions.size();
+		String[] args = new String[size];
+		for(int i = 0; i < size; i++)
+			args[i] = suggestions.get(i);
+
+		return args;
+	}
+
 }
