@@ -8,7 +8,12 @@ import java.util.UUID;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import amata1219.amachat.user.User;
+import amata1219.amachat.user.UserManager;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class Util {
 
@@ -63,6 +68,17 @@ public class Util {
 			args[i] = suggestions.get(i);
 
 		return args;
+	}
+
+	public static boolean isProxiedPlayer(CommandSender sender){
+		boolean b = sender instanceof ProxiedPlayer;
+		if(!b)
+			sender.sendMessage(toTextComponent(ChatColor.RED + "ゲーム内から実行して下さい。"));
+		return b;
+	}
+
+	public static User toUser(CommandSender sender){
+		return UserManager.getUser(((ProxiedPlayer) sender).getUniqueId());
 	}
 
 }

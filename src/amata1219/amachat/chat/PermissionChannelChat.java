@@ -1,6 +1,7 @@
 package amata1219.amachat.chat;
 
 import java.io.File;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -17,13 +18,15 @@ import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
 import net.md_5.bungee.config.Configuration;
 
-public class PermissionChannelChat extends Permission {
+public class PermissionChannelChat extends ChannelChat implements Permission {
 
 	public static final String NAME = "PermissionChannelChat";
 	public static final File DIRECTORY = new File(Chat.DIRECTORY + File.separator + "PermissionChannelChat");
 
+	protected Set<String> permissions;
+
 	protected PermissionChannelChat(final long id){
-		this.id = id;
+		super(id);
 	}
 
 	public static PermissionChannelChat load(long id){
@@ -137,6 +140,34 @@ public class PermissionChannelChat extends Permission {
 		}
 
 		ChatManager.sendMessage(users.stream().filter(id -> hasPermissions(UserManager.getUser(id))).collect(Collectors.toSet()), ProcessorManager.process(user, message, formats, processorNames), true);
+	}
+
+	@Override
+	public boolean hasPermission(String permission){
+		return permission.contains(permission);
+	}
+
+	@Override
+	public void addPermission(String permission){
+		permissions.add(permission);
+	}
+
+	@Override
+	public void removePermission(String permission){
+		permissions.remove(permission);
+	}
+
+	@Override
+	public void clearPermissions(){
+		permissions.clear();
+	}
+
+	@Override
+	public boolean hasPermissions(User user){
+		if(user == null)
+			return false;
+
+		return permissions.size() == permissions.stream().filter(permission -> user.toProxiedPlayer().hasPermission(permission)).count();
 	}
 
 }

@@ -1,34 +1,17 @@
 package amata1219.amachat.chat;
 
-import java.util.Set;
-
 import amata1219.amachat.user.User;
 
-public abstract class Permission extends Chat {
+public interface Permission {
 
-	protected Set<String> permissions;
+	boolean hasPermission(String permission);
 
-	public boolean hasPermission(String permission){
-		return permission.contains(permission);
-	}
+	void addPermission(String permission);
 
-	public void addPermission(String permission){
-		permissions.add(permission);
-	}
+	void removePermission(String permission);
 
-	public void removePermission(String permission){
-		permissions.remove(permission);
-	}
+	void clearPermissions();
 
-	public void clearPermissions(){
-		permissions.clear();
-	}
-
-	public boolean hasPermissions(User user){
-		if(user == null)
-			return false;
-
-		return permissions.size() == permissions.stream().filter(permission -> user.toProxiedPlayer().hasPermission(permission)).count();
-	}
+	boolean hasPermissions(User user);
 
 }

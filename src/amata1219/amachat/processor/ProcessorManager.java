@@ -68,4 +68,11 @@ public class ProcessorManager {
 		}
 	}
 
+	public static String process(String text, Set<String> processorNames){
+		String message = text;
+		for(Processor processor : get(processorNames.stream().filter(processorName -> !processorName.equals(GoogleIME.NAME) && ! processorName.equals(GoogleTranslate.NAME)).collect(Collectors.toSet())))
+			message = processor.process(message);
+		return message;
+	}
+
 }

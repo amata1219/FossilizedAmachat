@@ -4,6 +4,11 @@ import net.md_5.bungee.api.CommandSender;
 
 public class AmachatCommand extends Command {
 
+	/*
+	 * amachat
+	 *   reload [id]
+	 */
+
 	public AmachatCommand(String name, String permission, String... aliases) {
 		super(name, permission, aliases);
 	}

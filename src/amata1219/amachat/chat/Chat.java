@@ -129,7 +129,7 @@ public abstract class Chat {
 			return;
 		}
 
-		ChatManager.sendMessage(users, message, true);
+		ChatManager.sendMessage(users, ProcessorManager.process(message, processorNames), true);
 	}
 
 	public Config getConfig(){

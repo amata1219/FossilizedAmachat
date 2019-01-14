@@ -12,6 +12,7 @@ import amata1219.amachat.chat.VanillaChat;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
 import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.config.Configuration;
@@ -97,6 +98,14 @@ public class User {
 
 	public void sendMessage(String message){
 		sendMessage(Util.toTextComponent(message));
+	}
+
+	public void success(String message){
+		sendMessage(ChatColor.AQUA + message);
+	}
+
+	public void warn(String message){
+		sendMessage(ChatColor.RED + message);
 	}
 
 	public boolean isMuted(){
