@@ -8,21 +8,18 @@ import java.util.Set;
 
 import amata1219.amachat.Util;
 import amata1219.amachat.bot.event.ChatEvent4Bot;
-import amata1219.amachat.bot.event.ChatListener4Bot;
+import amata1219.amachat.bot.event.Listener4Bot;
 import amata1219.amachat.chat.Chat;
-import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
+import amata1219.amachat.user.User;
 import net.md_5.bungee.config.Configuration;
 
-public class ChatBot implements Bot, ChatListener4Bot {
+public class ChatBot extends Bot implements Listener4Bot {
 
 	public static final String NAME = "ChatBot";
 	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "ChatBot");
 
-	private long id;
-	private Config config;
-	private Set<Long> chats;
 	private HashMap<String, String> responces = new HashMap<>();
 
 	private ChatBot(long id){
@@ -32,31 +29,19 @@ public class ChatBot implements Bot, ChatListener4Bot {
 	public static ChatBot load(long id){
 		ChatBot bot = new ChatBot(id);
 
-		Config config = bot.config = Config.load(new File(DIRECTORY, String.valueOf(id) + ".yml"), "bot.yml", new Initializer(){
+		(bot.config = Config.load(new File(DIRECTORY, String.valueOf(id) + ".yml"), "bot.yml", new Initializer(){
 
 			@Override
 			public void initialize(Config config) {
-				Configuration conf = config.getConfiguration();
-				conf.set("Chats", Collections.emptySet());
+				Configuration configuration = config.getConfiguration();
+				configuration.set("ID", id);
+				configuration.set("ChatList", Collections.emptySet());
 				config.apply();
 			}
 
-		});
+		})).reload();
 
-		Configuration conf = bot.config.getConfiguration();
-		bot.chats = config.getLongSet("Chats");
-		Configuration section = conf.getSection("Responces");
-		section.getKeys().forEach(responce -> bot.responces.put(responce, section.getString(responce)));
-		bot.load();
 		return bot;
-	}
-
-	public void save(){
-		Configuration conf = config.getConfiguration();
-		conf.set("Chats", chats);
-		conf.set("Responces", null);
-		responces.forEach((k, v) -> conf.set("Responces." + k, v));
-		config.apply();
 	}
 
 	@Override
@@ -65,33 +50,23 @@ public class ChatBot implements Bot, ChatListener4Bot {
 	}
 
 	@Override
-	public long getId() {
-		return id;
+	public void save(){
+		if(config == null)
+			return;
+
+		config.getConfiguration().set("ChatList", chatIds);
+
+		config.apply();
 	}
 
 	@Override
-	public Config getConfig(){
-		return config;
-	}
+	public void reload(){
+		if(config == null)
+			return;
 
-	@Override
-	public Set<Chat> getJoinedChats() {
-		return ChatManager.getInstance().getChats(chats);
-	}
+		config.reload();
 
-	@Override
-	public boolean isJoined(long id) {
-		return chats.contains(id);
-	}
-
-	@Override
-	public void joinChat(long id) {
-		chats.add(id);
-	}
-
-	@Override
-	public void quitChat(long id) {
-		chats.remove(id);
+		chatIds = config.getLongSet("ChatList");
 	}
 
 	public Set<String> getKeywords(){
@@ -110,6 +85,10 @@ public class ChatBot implements Bot, ChatListener4Bot {
 		return responces.containsValue(message);
 	}
 
+	public String getMessage(String keyword){
+		return responces.get(keyword);
+	}
+
 	public void addResponce(String keyword, String responce){
 		responces.put(keyword, responce);
 	}
@@ -124,7 +103,7 @@ public class ChatBot implements Bot, ChatListener4Bot {
 			return;
 
 		Chat chat = event.getChat();
-		if(!chats.contains(chat.getId()))
+		if(!chatIds.contains(chat.getId()))
 			return;
 
 		String message = event.getMessage();
@@ -132,17 +111,15 @@ public class ChatBot implements Bot, ChatListener4Bot {
 			if(!message.matches(keyword))
 				continue;
 
-			//! - send to player
-			String replaced = replaceHolders(responces.get(keyword), event);
-			if(replaced.indexOf("!") == 1)
-				event.getPlayer().sendMessage(Util.toTextComponent(replaced));
+			//キーワードの接頭辞に!が含まれる場合発言者のみに送信
+			User user = event.getUser();
+			String replaced = message.replace("[player]", user.toProxiedPlayer().getName());
+
+			if(replaced.startsWith("!"))
+				user.sendMessage(Util.toTextComponent(replaced.substring(1)));
 			else
 				chat.broadcast(replaced);
 		}
-	}
-
-	public String replaceHolders(String message, ChatEvent4Bot event){
-		return message.replace("[player]", event.getPlayer().getPlayer().getName());
 	}
 
 }

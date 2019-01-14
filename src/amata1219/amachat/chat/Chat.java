@@ -11,6 +11,7 @@ import amata1219.amachat.bot.event.ChatEvent4Bot;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.event.BroadcastEvent;
 import amata1219.amachat.event.ChatEvent;
+import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.ProcessorManager;
@@ -86,8 +87,8 @@ public abstract class Chat {
 		UUID uuid = user.getUniqueId();
 
 		Chat match = PrefixManager.matchChat(message);
-		if(match != null && match.isJoin(uuid)){
-			match.chat(user, message);
+		if(match != null && match != this && match.isJoin(uuid)){
+			match.chat(user, PrefixManager.removePrefix((Prefix) match, message));
 			return;
 		}
 

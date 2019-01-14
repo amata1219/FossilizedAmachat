@@ -1,7 +1,6 @@
 package amata1219.amachat.chat;
 
 import java.io.File;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -10,6 +9,7 @@ import amata1219.amachat.bot.event.ChatEvent4Bot;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
 import amata1219.amachat.event.ChatEvent;
+import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.ProcessorManager;
@@ -17,15 +17,13 @@ import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
 import net.md_5.bungee.config.Configuration;
 
-public class PermissionChannelChat extends ChannelChat {
+public class PermissionChannelChat extends Permission {
 
 	public static final String NAME = "PermissionChannelChat";
-	public static final File DIRECTORY = new File(Chat.DIRECTORY + File.separator + "ChannelChat");
-
-	protected Set<String> permissions;
+	public static final File DIRECTORY = new File(Chat.DIRECTORY + File.separator + "PermissionChannelChat");
 
 	protected PermissionChannelChat(final long id){
-		super(id);
+		this.id = id;
 	}
 
 	public static PermissionChannelChat load(long id){
@@ -69,7 +67,6 @@ public class PermissionChannelChat extends ChannelChat {
 		config.set("Users", users);
 		config.set("MutedUsers", mutedUsers);
 		config.set("BannedUsers", bannedUsers);
-		configuration.set("Prefix", prefix);
 		configuration.set("Permissions", permissions);
 
 		config.apply();
@@ -95,7 +92,6 @@ public class PermissionChannelChat extends ChannelChat {
 		users = config.getUniqueIdSet("Users");
 		mutedUsers = config.getUniqueIdSet("MutedUsers");
 		bannedUsers = config.getUniqueIdSet("BannedUsers");
-		prefix = configuration.getString("Prefix");
 		permissions = config.getStringSet("Permissions");
 	}
 
@@ -104,8 +100,8 @@ public class PermissionChannelChat extends ChannelChat {
 		UUID uuid = user.getUniqueId();
 
 		Chat match = PrefixManager.matchChat(message);
-		if(match != null && match.isJoin(uuid)){
-			match.chat(user, message);
+		if(match != null && match != this && match.isJoin(uuid)){
+			match.chat(user, PrefixManager.removePrefix((Prefix) match, message));
 			return;
 		}
 
@@ -134,29 +130,6 @@ public class PermissionChannelChat extends ChannelChat {
 		}
 
 		ChatManager.sendMessage(users.stream().filter(id -> hasPermissions(UserManager.getUser(id))).collect(Collectors.toSet()), ProcessorManager.process(user, message, formats, processorNames), true);
-	}
-
-	public boolean hasPermission(String permission){
-		return permission.contains(permission);
-	}
-
-	public void addPermission(String permission){
-		permissions.add(permission);
-	}
-
-	public void removePermission(String permission){
-		permissions.remove(permission);
-	}
-
-	public void clearPermissions(){
-		permissions.clear();
-	}
-
-	public boolean hasPermissions(User user){
-		if(user == null)
-			return false;
-
-		return permissions.size() == permissions.stream().filter(permission -> user.toProxiedPlayer().hasPermission(permission)).count();
 	}
 
 }

@@ -8,8 +8,6 @@ import net.md_5.bungee.config.Configuration;
 
 public class Mail extends AbstractMail {
 
-	private static boolean load;
-
 	private Mail(long timestamp){
 		this.timestamp = timestamp;
 	}
@@ -22,14 +20,7 @@ public class Mail extends AbstractMail {
 		return mail;
 	}
 
-	public static boolean isLoaded(){
-		return load;
-	}
-
 	public static void load(Configuration section){
-		if(load)
-			return;
-
 		section.getKeys().forEach(key -> {
 			Mail mail = new Mail(Long.valueOf(key).longValue());
 			mail.sender = UUID.fromString(section.getString(key + ".Sender"));
@@ -37,8 +28,6 @@ public class Mail extends AbstractMail {
 			mail.text = section.getString(key + ".Text");
 			MailManager.addMail(mail);
 		});
-
-		load = true;
 	}
 
 	@Override

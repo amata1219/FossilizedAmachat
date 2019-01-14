@@ -79,8 +79,8 @@ public class UserManager implements Listener {
 		return players.values().stream().collect(Collectors.toSet());
 	}
 
-	public static Set<User> getUsersByUniqueIdSet(Set<UUID> uuidSet){
-		return players.values().stream().filter(player -> uuidSet.contains(player.getUniqueId())).collect(Collectors.toSet());
+	public static Set<User> getUsersByUniqueIdSet(Set<UUID> uuids){
+		return players.values().stream().filter(player -> uuids.contains(player.getUniqueId())).collect(Collectors.toSet());
 	}
 
 	public static boolean fix(ProxiedPlayer player){

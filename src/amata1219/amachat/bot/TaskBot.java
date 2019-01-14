@@ -1,13 +1,36 @@
 package amata1219.amachat.bot;
 
-public interface TaskBot extends Bot, Runnable {
+import java.util.concurrent.TimeUnit;
 
-	void start();
+import amata1219.amachat.Amachat;
+import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 
-	void pause();
+public abstract class TaskBot extends Bot implements Runnable {
 
-	void stop();
+	protected ScheduledTask task;
+	protected long interval;
+	protected boolean pause;
 
-	boolean isPause();
+	public void start() {
+		if(task != null)
+			stop();
 
+		task = BungeeCord.getInstance().getScheduler().schedule(Amachat.getPlugin(), this, 0L, interval, TimeUnit.SECONDS);
+	}
+
+	public boolean isPause(){
+		return pause;
+	}
+
+	public void setPause(boolean pause){
+		this.pause = pause;
+	}
+
+	public void stop() {
+		task.cancel();
+	}
+
+	@Override
+	public abstract void run();
 }

@@ -1,6 +1,7 @@
 package amata1219.amachat.chat;
 
 import java.io.File;
+
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
 import amata1219.amachat.prefix.Prefix;

@@ -8,7 +8,7 @@ import amata1219.amachat.user.User;
 
 public class ChatEvent4Bot {
 
-	private static final Set<ChatListener4Bot> LISTENERS = new HashSet<>();
+	private static final Set<Listener4Bot> LISTENERS = new HashSet<>();
 
 	private Chat chat;
 	private User user;
@@ -28,11 +28,11 @@ public class ChatEvent4Bot {
 		return event;
 	}
 
-	public static void register(ChatListener4Bot listener){
+	public static void register(Listener4Bot listener){
 		LISTENERS.add(listener);
 	}
 
-	public static void unregister(ChatListener4Bot listener){
+	public static void unregister(Listener4Bot listener){
 		LISTENERS.remove(listener);
 	}
 

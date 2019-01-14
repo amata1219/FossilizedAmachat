@@ -3,55 +3,41 @@ package amata1219.amachat.bot;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import amata1219.amachat.Amachat;
-import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
-import net.md_5.bungee.BungeeCord;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 
-public class AutoMessageBot implements TaskBot {
+public class AutoMessageBot extends TaskBot {
 
 	public static final String NAME = "AutoMessageBot";
-	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "AutoMessageBots");
+	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "AutoMessageBot");
 
-	private final long id;
-	private Config config;
-	private Set<Long> chats;
 	private List<String> messages;
+	private long interval;
 	private int count;
 
-	private ScheduledTask task;
-	private boolean pause;
-
-	private AutoMessageBot(long id){
+	protected AutoMessageBot(final long id){
 		this.id = id;
 	}
 
 	public static AutoMessageBot load(long id){
 		AutoMessageBot bot = new AutoMessageBot(id);
 
-		Config config = bot.config = Config.load(new File(DIRECTORY, String.valueOf(id) + ".yml"), "bot.yml", new Initializer(){
+		(bot.config = Config.load(new File(DIRECTORY, String.valueOf(id) + ".yml"), "bot.yml", new Initializer(){
 
 			@Override
 			public void initialize(Config config) {
-				Configuration conf = config.getConfiguration();
-				conf.set("Chats", Collections.emptySet());
-				conf.set("Messages", Collections.emptySet());
-				conf.set("Interval", 300);
+				Configuration configuration = config.getConfiguration();
+				configuration.set("ID", id);
+				configuration.set("ChatList", Collections.emptySet());
+				configuration.set("Messages", Collections.emptySet());
+				configuration.set("Interval", 60);
 				config.apply();
 			}
 
-		});
+		})).reload();
 
-		Configuration conf = bot.config.getConfiguration();
-		bot.chats = config.getLongSet("Chats");
-		bot.messages = conf.getStringList("Messages");
 		return bot;
 	}
 
@@ -61,33 +47,30 @@ public class AutoMessageBot implements TaskBot {
 	}
 
 	@Override
-	public long getId() {
-		return id;
+	public void save(){
+		if(config == null)
+			return;
+
+		Configuration configuration = config.getConfiguration();
+		configuration.set("ChatList", chatIds);
+		configuration.set("Messages", messages);
+		configuration.set("Interval", interval);
+
+		config.apply();
 	}
 
 	@Override
-	public Config getConfig(){
-		return config;
-	}
+	public void reload(){
+		if(config == null)
+			return;
 
-	@Override
-	public Set<Chat> getJoinedChats() {
-		return ChatManager.getInstance().getChats(chats);
-	}
+		config.reload();
 
-	@Override
-	public boolean isJoined(long id) {
-		return chats.contains(id);
-	}
+		Configuration configuration = config.getConfiguration();
 
-	@Override
-	public void joinChat(long id) {
-		chats.add(id);
-	}
-
-	@Override
-	public void quitChat(long id) {
-		chats.remove(id);
+		chatIds = config.getLongSet("ChatList");
+		messages = configuration.getStringList("Messages");
+		interval = configuration.getLong("Interval");
 	}
 
 	public List<String> getMessages(){
@@ -116,34 +99,11 @@ public class AutoMessageBot implements TaskBot {
 	}
 
 	@Override
-	public void start() {
-		if(task != null)
-			stop();
-
-		task = BungeeCord.getInstance().getScheduler().schedule(Amachat.getPlugin(), this, 0L, getInterval(), TimeUnit.SECONDS);
-	}
-
-	@Override
-	public void pause() {
-		pause = !pause;
-	}
-
-	@Override
-	public void stop() {
-		task.cancel();
-	}
-
-	@Override
-	public boolean isPause() {
-		return pause;
-	}
-
-	@Override
 	public void run() {
 		if(pause || messages.isEmpty())
 			return;
 
-		ChatManager.getInstance().getChats(chats).forEach(chat -> chat.broadcast(messages.get(messages.size() > count ? count++ : (count = 0))));
+		ChatManager.getChatSet(chatIds).forEach(chat -> chat.broadcast(messages.get(messages.size() > count ? count++ : (count = 0))));
 	}
 
 }

@@ -16,6 +16,9 @@ public class PrefixManager {
 	}
 
 	public static void addPrefix(Prefix prefix){
+		/*if(!(prefix instanceof Chat))
+			new UnsupportedOperationException("Is not an instance of a sub class that extends amata1219.amachat.chat.Chat");*/
+
 		PREFIXES.add(prefix);
 	}
 
@@ -33,6 +36,10 @@ public class PrefixManager {
 		}
 
 		return null;
+	}
+
+	public static String removePrefix(Prefix prefix, String message){
+		return message.substring(prefix.getPrefix().length());
 	}
 
 }

@@ -1,6 +1,6 @@
 package amata1219.amachat.bot.event;
 
-public interface ChatListener4Bot {
+public interface Listener4Bot {
 
 	void onChatMessageReceived(ChatEvent4Bot event);
 

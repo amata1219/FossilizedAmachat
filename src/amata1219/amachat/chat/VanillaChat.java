@@ -14,10 +14,10 @@ public class VanillaChat extends Chat {
 
 	}
 
-	public static VanillaChat load(){
+	public static void load(){
 		VanillaChat chat = new VanillaChat();
 
-		chat.config = Config.load(new File(Chat.DIRECTORY, "vanilla.yml"), "chat.yml", new Initializer(){
+		(chat.config = Config.load(new File(Chat.DIRECTORY, "vanilla.yml"), "chat.yml", new Initializer(){
 
 			@Override
 			public void initialize(Config config) {
@@ -25,11 +25,9 @@ public class VanillaChat extends Chat {
 				config.apply();
 			}
 
-		});
+		})).reload();
 
-		chat.reload();
-
-		return chat;
+		ChatManager.registerChat(ID, chat);
 	}
 
 	@Override

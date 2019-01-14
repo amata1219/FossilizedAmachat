@@ -46,6 +46,10 @@ public class Util {
 		return fileName.endsWith(".yml");
 	}
 
+	public static long getId(String fileName){
+		return Long.valueOf(fileName.substring(0, fileName.length() - 4)).longValue();
+	}
+
 	public static String[] toArgs(String... args){
 		return args;
 	}

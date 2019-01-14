@@ -13,22 +13,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 import amata1219.amachat.bot.event.ChatEvent4Bot;
-import amata1219.amachat.bot.event.ChatListener4Bot;
-import amata1219.amachat.chat.Chat;
-import amata1219.amachat.chat.ChatManager;
+import amata1219.amachat.bot.event.Listener4Bot;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
 import net.md_5.bungee.config.Configuration;
 
-public class ActionBot implements Bot, ChatListener4Bot {
+public class ActionBot extends Bot implements Listener4Bot {
 
 	public static final String NAME = "ActionBot";
 	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "ActionBots");
 
-	private final long id;
-	private Config config;
-	private Set<Long> chats;
-	private Set<Action> actions;
+	private Set<Action> actions = new HashSet<>();
 
 	private ActionBot(long id){
 		this.id = id;
@@ -37,32 +32,20 @@ public class ActionBot implements Bot, ChatListener4Bot {
 	public static ActionBot load(long id){
 		ActionBot bot = new ActionBot(id);
 
-		Config config = bot.config = Config.load(new File(DIRECTORY, String.valueOf(id) + ".yml"), "bot.yml", new Initializer(){
+		(bot.config = Config.load(new File(DIRECTORY, String.valueOf(id) + ".yml"), "bot.yml", new Initializer(){
 
 			@Override
 			public void initialize(Config config) {
-				Configuration conf = config.getConfiguration();
-				conf.set("Chats", Collections.emptySet());
-				conf.set("Actions", Collections.emptySet());
+				Configuration configuration = config.getConfiguration();
+				configuration.set("ID", id);
+				configuration.set("ChatList", Collections.emptySet());
+				configuration.set("Actions", Collections.emptySet());
 				config.apply();
 			}
 
-		});
+		})).reload();
 
-		Configuration conf = bot.config.getConfiguration();
-		bot.chats = config.getLongSet("Chats");
-		conf.getStringList("Actions").forEach(action -> bot.actions.add(Action.decode(action)));
-		bot.load();
 		return bot;
-	}
-
-	public void save(){
-		Configuration conf = config.getConfiguration();
-		conf.set("Chats", chats);
-		Set<String> data = new HashSet<>();
-		actions.forEach(action -> data.add(Action.encode(action)));
-		conf.set("Actions", data);
-		config.apply();
 	}
 
 	@Override
@@ -71,33 +54,32 @@ public class ActionBot implements Bot, ChatListener4Bot {
 	}
 
 	@Override
-	public long getId() {
-		return id;
+	public void save(){
+		if(config == null)
+			return;
+
+		Configuration configuration = config.getConfiguration();
+
+		configuration.set("ChatList", chatIds);
+		Set<String> data = new HashSet<>();
+		actions.forEach(action -> data.add(Action.encode(action)));
+		configuration.set("Actions", data);
+
+		config.apply();
 	}
 
 	@Override
-	public Config getConfig(){
-		return config;
-	}
+	public void reload(){
+		if(config == null)
+			return;
 
-	@Override
-	public Set<Chat> getJoinedChats() {
-		return ChatManager.getInstance().getChats(chats);
-	}
+		config.reload();
 
-	@Override
-	public boolean isJoined(long id) {
-		return chats.contains(id);
-	}
+		Configuration configuration = config.getConfiguration();
 
-	@Override
-	public void joinChat(long id) {
-		chats.add(id);
-	}
-
-	@Override
-	public void quitChat(long id) {
-		chats.remove(id);
+		chatIds = config.getLongSet("ChatList");
+		actions.clear();
+		configuration.getStringList("Actions").forEach(action -> actions.add(Action.decode(action)));
 	}
 
 	public static interface Action extends Serializable {
@@ -134,7 +116,7 @@ public class ActionBot implements Bot, ChatListener4Bot {
 		if(event.isCancelled())
 			return;
 
-		if(!chats.contains(event.getChat().getId()))
+		if(!chatIds.contains(event.getChat().getId()))
 			return;
 
 		actions.forEach(action -> action.done(event));
