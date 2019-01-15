@@ -63,7 +63,7 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 		configuration.set("JoinMessage", joinMessage);
 		configuration.set("QuitMessage", quitMessage);
 
-		formats.forEach((k, v) -> {
+		messageFormats.forEach((k, v) -> {
 			String type = k.name();
 			configuration.set(Character.toUpperCase(type.charAt(0)) + type.substring(1), v);
 		});
@@ -92,8 +92,8 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 		joinMessage = configuration.getString("JoinMessage");
 		quitMessage = configuration.getString("QuitMessage");
 
-		formats.clear();
-		configuration.getSection("Formats").getKeys().forEach(type -> formats.put(FormatType.valueOf(type.toUpperCase()), configuration.getString("Formats." + type)));
+		messageFormats.clear();
+		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(FormatType.valueOf(type.toUpperCase()), configuration.getString("Formats." + type)));
 
 		processorNames = config.getStringSet("Processors");
 		users = config.getUniqueIdSet("Users");
@@ -139,7 +139,7 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 			return;
 		}
 
-		ChatManager.sendMessage(users.stream().filter(id -> hasPermissions(UserManager.getUser(id))).collect(Collectors.toSet()), ProcessorManager.process(user, message, formats, processorNames), true);
+		ChatManager.sendMessage(users.stream().filter(id -> hasPermissions(UserManager.getUser(id))).collect(Collectors.toSet()), ProcessorManager.process(user, message, messageFormats, processorNames), true);
 	}
 
 	@Override

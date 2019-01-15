@@ -13,7 +13,7 @@ import javax.xml.ws.ProtocolException;
 import amata1219.amachat.Amachat;
 import net.md_5.bungee.config.Configuration;
 
-public class GoogleTranslate implements Processor {
+public final class GoogleTranslate implements Processor {
 
 	public static final String NAME = "GoogleTranslate";
 

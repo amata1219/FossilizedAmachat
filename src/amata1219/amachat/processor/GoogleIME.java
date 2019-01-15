@@ -17,7 +17,7 @@ import amata1219.amachat.Amachat;
 import amata1219.amachat.Util;
 import net.md_5.bungee.config.Configuration;
 
-public class GoogleIME implements Processor {
+public final class GoogleIME implements Processor {
 
 	public static final String NAME = "GoogleIME";
 
@@ -88,14 +88,10 @@ public class GoogleIME implements Processor {
 
 	}
 
-	public static GoogleIME load(){
-		GoogleIME ime = new GoogleIME();
-
+	public static void load(){
 		Configuration config = Amachat.getConfig().getConfiguration().getSection("GoogleIME");
-		if(!config.getBoolean("Enable"))
-			return null;
-
-		return ime;
+		if(config.getBoolean("Enable"))
+			ProcessorManager.register(new GoogleIME());
 	}
 
 	@Override
@@ -105,18 +101,18 @@ public class GoogleIME implements Processor {
 
 	@Override
 	public String process(String text) {
-		return japanize(text);
+		return GoogleIME.japanize(text);
 	}
 
 	public static boolean canJapanize(String text){
-		return text.length() == text.getBytes().length;
+		return text.length() == text.getBytes().length || text.matches("[ \\uFF61-\\uFF9F]+");
 	}
 
 	public boolean checkJapanize(){
-		return japanize("konnnitiha") != null;
+		return process("konnnitiha") != null;
 	}
 
-	public String japanize(String text){
+	public static String japanize(String text){
 		StringBuilder builder = new StringBuilder();
 		String line = "";
 		for(int i = 0; i < text.length(); i++){
@@ -149,8 +145,9 @@ public class GoogleIME implements Processor {
 					if(tmp.equals("n"))
 						continue;
 				}
-				if(Character.isLetter(tmp.charAt(0))){
-					if(Character.isUpperCase(tmp.charAt(0))){
+				char firstChar = tmp.charAt(0);
+				if(Character.isLetter(firstChar)){
+					if(Character.isUpperCase(firstChar)){
 						builder.append(line + tmp);
 						line = "";
 					}else if(line.equals(tmp)){

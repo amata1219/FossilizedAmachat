@@ -1,13 +1,18 @@
 Version: 0.0
 ID: -1
+Aliases: ''
+Description: ''
 CanChat: true
+CanQuit: true
 JoinMessage: ''
 QuitMessage: ''
-Formats:
-  Normal: '[player]&a:&r [message]'
-  Japanized: '[player]&a:&r [japanized]&7([message])'
-  Translation: '[player]&a:&r [translation]&7([message])'
+Format: '[&a[chat]]&r[player]&a:&r [message]'
+MessageFormats:
+  Normal: '[original]'
+  Japanize: '[converted]&7([original])'
+  Translate: '[converted]&7([original])'
 Processors: []
 Users: []
 MutedUsers: []
 BannedUsers: []
+Expires:

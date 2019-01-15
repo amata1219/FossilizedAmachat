@@ -21,24 +21,31 @@ public class ChatManager {
 
 	private static final Map<Long, Chat> CHAT_MAP = new HashMap<>();
 	//Chat#getId(), Chat
+	private static final Method listFiles;
+	static{
+		Method arg0 = null;
+		try{
+			arg0 = File.class.getMethod("listFiles");
+		}catch (NoSuchMethodException | SecurityException e){
+			e.printStackTrace();
+		}
+		listFiles = arg0;
+	}
 
 	public static void load(Class<?> clazz){
-		Method load = null;
-		Method listFiles = null;
-		Field DIRECTORY = null;
+		clazz.asSubclass(Chat.class);
 
+		Method load = null;
+		Field DIRECTORY = null;
 		try {
 			load = clazz.getMethod("load", long.class);
-			listFiles = File.class.getMethod("listFiles");
 			DIRECTORY = clazz.getField("DIRECTORY");
 			DIRECTORY.setAccessible(true);
-		} catch (NoSuchFieldException | SecurityException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
+		}catch (NoSuchMethodException | SecurityException | NoSuchFieldException e){
 			e.printStackTrace();
 		}
 
-		try {
+		try{
 			for(File file : (File[]) listFiles.invoke(DIRECTORY)){
 				String fileName = file.getName();
 				if(!Util.isYamlConfiguration(fileName))
@@ -47,7 +54,7 @@ public class ChatManager {
 				long id = Util.getId(fileName);
 				registerChat(id, (Chat) load.invoke(null, id));
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
 			e.printStackTrace();
 		}
 	}

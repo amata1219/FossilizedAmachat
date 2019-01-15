@@ -1,5 +1,7 @@
 package amata1219.amachat.processor;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,30 +13,41 @@ import amata1219.amachat.user.UserManager;
 
 public class ProcessorManager {
 
-	private static final Map<String, Processor> REGISTRY = new HashMap<>();
+	private static final Map<String, Processor> PROCESSORS = new HashMap<>();
 
 	private ProcessorManager(){
 
 	}
 
+	public static void load(Class<?> clazz){
+		clazz.asSubclass(Processor.class);
+
+		try {
+			Method load = clazz.getMethod("load");
+			load.invoke(null);
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void register(Processor processor){
-		REGISTRY.put(processor.getName(), processor);
+		PROCESSORS.put(processor.getName(), processor);
 	}
 
 	public static void unregister(String processorName){
-		REGISTRY.remove(processorName);
+		PROCESSORS.remove(processorName);
 	}
 
 	public static Processor get(String processorName){
-		return REGISTRY.get(processorName);
+		return PROCESSORS.get(processorName);
 	}
 
 	public static Set<Processor> get(List<String> processorNames){
-		return REGISTRY.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toSet());
+		return PROCESSORS.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toSet());
 	}
 
 	public static Set<Processor> get(Set<String> processorNames){
-		return REGISTRY.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toSet());
+		return PROCESSORS.values().stream().filter(processor -> processorNames.contains(processor.getName())).collect(Collectors.toSet());
 	}
 
 	public static String process(User speaker, String text, Map<FormatType, String> formats, Set<String> processorNames){

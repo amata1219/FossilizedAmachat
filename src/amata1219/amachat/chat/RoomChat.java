@@ -64,8 +64,8 @@ public class RoomChat extends Chat {
 		quitMessage = configuration.getString("QuitMessage");
 		inviteMessage = configuration.getString("InviteMessage");
 
-		formats.clear();
-		configuration.getSection("Formats").getKeys().forEach(type -> formats.put(FormatType.valueOf(type.toUpperCase()), configuration.getString("Formats." + type)));
+		messageFormats.clear();
+		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(FormatType.valueOf(type.toUpperCase()), configuration.getString("Formats." + type)));
 
 		processorNames = config.getStringSet("Processors");
 	}
@@ -87,7 +87,7 @@ public class RoomChat extends Chat {
 			return;
 		}
 
-		ChatManager.sendMessage(users, ProcessorManager.process(user, message, formats, processorNames), true);
+		ChatManager.sendMessage(users, ProcessorManager.process(user, message, messageFormats, processorNames), true);
 	}
 
 	@Override

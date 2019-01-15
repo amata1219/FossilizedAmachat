@@ -13,6 +13,7 @@ import amata1219.amachat.event.BroadcastEvent;
 import amata1219.amachat.event.ChatEvent;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
+import amata1219.amachat.processor.Coloring;
 import amata1219.amachat.processor.FormatType;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.User;
@@ -26,11 +27,13 @@ public abstract class Chat {
 	protected long id;
 	protected Config config;
 	protected String aliases, description;
-	protected boolean chat;
-	protected Map<FormatType, String> formats = new HashMap<>();
+	protected boolean chat, quit;
+	protected String joinMessage, quitMessage;
+	protected String format;
+	protected Map<FormatType, String> messageFormats = new HashMap<>();
 	protected Set<String> processorNames;
 	protected Set<UUID> users, mutedUsers, bannedUsers;
-	protected String joinMessage, quitMessage;
+	protected Map<UUID, Long> expires = new HashMap<>();
 
 	public abstract String getName();
 
@@ -48,18 +51,23 @@ public abstract class Chat {
 		configuration.set("Aliases", aliases);
 		configuration.set("Description", description);
 		configuration.set("CanChat", chat);
+		configuration.set("CanQuit", quit);
 		configuration.set("JoinMessage", joinMessage);
 		configuration.set("QuitMessage", quitMessage);
+		configuration.set("Format", Coloring.inverse(format));
 
-		formats.forEach((k, v) -> {
+		messageFormats.forEach((k, v) -> {
 			String type = k.name();
-			configuration.set(Character.toUpperCase(type.charAt(0)) + type.substring(1), v);
+			configuration.set(Character.toUpperCase(type.charAt(0)) + type.substring(1), Coloring.inverse(v));
 		});
 
 		configuration.set("Processors", processorNames);
 		config.set("Users", users);
 		config.set("MutedUsers", mutedUsers);
 		config.set("BannedUsers", bannedUsers);
+
+		config.set("Expires", null);
+		expires.forEach((k, v) -> configuration.set("Expires." + k.toString(), v.longValue()));
 
 		config.apply();
 	}
@@ -76,16 +84,21 @@ public abstract class Chat {
 		aliases = configuration.getString("Aliases");
 		description = configuration.getString("Description");
 		chat = configuration.getBoolean("CanChat");
+		quit = configuration.getBoolean("CanQuit");
 		joinMessage = configuration.getString("JoinMessage");
 		quitMessage = configuration.getString("QuitMessage");
+		format = Coloring.coloring(configuration.getString("Format"));
 
-		formats.clear();
-		configuration.getSection("Formats").getKeys().forEach(type -> formats.put(FormatType.valueOf(type.toUpperCase()), configuration.getString("Formats." + type)));
+		messageFormats.clear();
+		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(FormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));
 
 		processorNames = config.getStringSet("Processors");
 		users = config.getUniqueIdSet("Users");
 		mutedUsers = config.getUniqueIdSet("MutedUsers");
 		bannedUsers = config.getUniqueIdSet("BannedUsers");
+
+		expires.clear();
+		configuration.getSection("Expires").getKeys().forEach(uuid -> expires.put(UUID.fromString(uuid), configuration.getLong("Expires." + uuid)));
 	}
 
 	public void chat(User user, String message){
@@ -119,7 +132,7 @@ public abstract class Chat {
 			return;
 		}
 
-		ChatManager.sendMessage(users, ProcessorManager.process(user, message, formats, processorNames), true);
+		ChatManager.sendMessage(users, ProcessorManager.process(user, message, messageFormats, processorNames), true);
 	}
 
 	public void broadcast(String message){
@@ -161,11 +174,11 @@ public abstract class Chat {
 	}
 
 	public String getFormat(FormatType type){
-		return formats.get(type);
+		return messageFormats.get(type);
 	}
 
 	public void setFormat(FormatType type, String format){
-		formats.put(type, format);
+		messageFormats.put(type, format);
 	}
 
 	public Set<String> getProcessors(){
