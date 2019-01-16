@@ -23,19 +23,19 @@ public final class GoogleTranslate implements Processor {
 
 	}
 
-	public static GoogleTranslate load(){
-		GoogleTranslate api = new GoogleTranslate();
-
+	public static void load(){
 		Configuration configuration = Amachat.getConfig().getConfiguration().getSection("GoogleTranslate");
 		if(!configuration.getBoolean("Enable"))
-			return null;
+			return;
 
-		api.url = configuration.getString("ScriptURL") + "/exec?text=$1&source=&target=$2";
+		GoogleTranslate processor = new GoogleTranslate();
 
-		if(!api.checkTranslate())
-			return null;
+		processor.url = configuration.getString("ScriptURL") + "/exec?text=$1&source=&target=$2";
 
-		return api;
+		if(!processor.checkTranslate())
+			return;
+
+		ProcessorManager.register(processor);
 	}
 
 	@Override

@@ -21,6 +21,7 @@ import amata1219.amachat.mail.Mail;
 import amata1219.amachat.mail.MailManager;
 import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
+import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.Connection;
@@ -35,12 +36,16 @@ public class Amachat extends Plugin implements Listener {
 	private static Amachat plugin;
 
 	public static final float VERSION = 1.0F;
+	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "Amachat");
 	private HashMap<String, Command> commands = new HashMap<>();
 	private Config config;
 
 	@Override
 	public void onEnable() {
 		plugin = this;
+
+		if(!DIRECTORY.exists())
+			DIRECTORY.mkdirs();
 
 		getProxy().getPluginManager().registerListener(this, this);
 

@@ -1,4 +1,12 @@
 Version: 0.0
+NGWordMask:
+  Enable:
+  NGWords:
+  - '死ね'
+PlaceHolder:
+  Enable:
+  Holders:
+  - 'あまちゃっと[:]Amachat'
 GoogleIME:
   Enable: true
 GoogleTranslate:

@@ -12,7 +12,7 @@ import amata1219.amachat.config.Initializer;
 import amata1219.amachat.event.ChatEvent;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
-import amata1219.amachat.processor.FormatType;
+import amata1219.amachat.processor.Coloring;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
@@ -21,7 +21,7 @@ import net.md_5.bungee.config.Configuration;
 public class PermissionChannelChat extends ChannelChat implements Permission {
 
 	public static final String NAME = "PermissionChannelChat";
-	public static final File DIRECTORY = new File(Chat.DIRECTORY + File.separator + "PermissionChannelChat");
+	public static final File DIRECTORY = new File(Chat.DIRECTORY + File.separator + NAME);
 
 	protected Set<String> permissions;
 
@@ -60,18 +60,18 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 		configuration.set("Aliases", aliases);
 		configuration.set("Description", description);
 		configuration.set("CanChat", chat);
+		configuration.set("CanQuit", quit);
 		configuration.set("JoinMessage", joinMessage);
 		configuration.set("QuitMessage", quitMessage);
-
-		messageFormats.forEach((k, v) -> {
-			String type = k.name();
-			configuration.set(Character.toUpperCase(type.charAt(0)) + type.substring(1), v);
-		});
-
-		configuration.set("Processors", processorNames);
+		configuration.set("Format", Coloring.inverse(format));
+		messageFormats.forEach((type, messageFormat) -> configuration.set(type.toCamelCase(), Coloring.inverse(messageFormat)));
+		configuration.set("Processors", ProcessorManager.toProcessorNames(processors));
 		config.set("Users", users);
 		config.set("MutedUsers", mutedUsers);
 		config.set("BannedUsers", bannedUsers);
+		config.set("Expires", null);
+		expires.forEach((uuid, time) -> configuration.set("Expires." + uuid.toString(), time.longValue()));
+		configuration.set("Prefix", prefix);
 		configuration.set("Permissions", permissions);
 
 		config.apply();
@@ -89,16 +89,19 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 		aliases = configuration.getString("Aliases");
 		description = configuration.getString("Description");
 		chat = configuration.getBoolean("CanChat");
+		quit = configuration.getBoolean("CanQuit");
 		joinMessage = configuration.getString("JoinMessage");
 		quitMessage = configuration.getString("QuitMessage");
-
+		format = Coloring.coloring(configuration.getString("Format"));
 		messageFormats.clear();
-		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(FormatType.valueOf(type.toUpperCase()), configuration.getString("Formats." + type)));
-
-		processorNames = config.getStringSet("Processors");
+		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(MessageFormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));
+		processors = ProcessorManager.fromProcessorNames(configuration.getStringList("Processors"));
 		users = config.getUniqueIdSet("Users");
 		mutedUsers = config.getUniqueIdSet("MutedUsers");
 		bannedUsers = config.getUniqueIdSet("BannedUsers");
+		expires.clear();
+		configuration.getSection("Expires").getKeys().forEach(uuid -> expires.put(UUID.fromString(uuid), configuration.getLong("Expires." + uuid)));
+		prefix = configuration.getString("Prefix");
 		permissions = config.getStringSet("Permissions");
 	}
 
@@ -139,7 +142,7 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 			return;
 		}
 
-		ChatManager.sendMessage(users.stream().filter(id -> hasPermissions(UserManager.getUser(id))).collect(Collectors.toSet()), ProcessorManager.process(user, message, messageFormats, processorNames), true);
+		ChatManager.sendMessage(users.stream().filter(id -> hasPermissions(UserManager.getUser(id))).collect(Collectors.toSet()), ProcessorManager.processAll(this, user, message), true);
 	}
 
 	@Override
@@ -167,7 +170,12 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 		if(user == null)
 			return false;
 
-		return permissions.size() == permissions.stream().filter(permission -> user.toProxiedPlayer().hasPermission(permission)).count();
+		for(String permission : permissions){
+			if(!user.toProxiedPlayer().hasPermission(permission))
+				return false;
+		}
+
+		return true;
 	}
 
 }

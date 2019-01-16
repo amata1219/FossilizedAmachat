@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import amata1219.amachat.Amachat;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.processor.Coloring;
-import amata1219.amachat.processor.FormatType;
+import amata1219.amachat.processor.MessageFormatType;
 import amata1219.amachat.processor.Processor;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.UserManager;
@@ -19,7 +19,7 @@ import net.md_5.bungee.config.Configuration;
 public class MailManager {
 
 	private static Config config;
-	private static final HashMap<FormatType, String> formats = new HashMap<>();
+	private static final HashMap<MessageFormatType, String> formats = new HashMap<>();
 	private static final Set<String> processorNames = new HashSet<>();
 	private static final Set<AbstractMail> mails = new HashSet<>();
 
@@ -37,9 +37,9 @@ public class MailManager {
 		processorNames.addAll(config.getStringSet("Mail.Processors"));
 		Processor coloring = ProcessorManager.get(Coloring.NAME);
 		Configuration configuration = config.getConfiguration().getSection("Mail");
-		formats.put(FormatType.NORMAL, coloring.process(configuration.getString("Format.Normal")));
-		formats.put(FormatType.JAPANIZED, coloring.process(configuration.getString("Format.Japanized")));
-		formats.put(FormatType.TRANSLATION, coloring.process(configuration.getString("Format.Translation")));
+		formats.put(MessageFormatType.NORMAL, coloring.process(configuration.getString("Format.Normal")));
+		formats.put(MessageFormatType.JAPANIZED, coloring.process(configuration.getString("Format.Japanized")));
+		formats.put(MessageFormatType.TRANSLATION, coloring.process(configuration.getString("Format.Translation")));
 	}
 
 	public static boolean isEnable(){

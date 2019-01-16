@@ -1,7 +1,9 @@
 package amata1219.amachat.chat;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -14,15 +16,14 @@ import amata1219.amachat.event.ChatEvent;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.Coloring;
-import amata1219.amachat.processor.FormatType;
+import amata1219.amachat.processor.Processor;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.User;
-import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.config.Configuration;
 
 public abstract class Chat {
 
-	public static final File DIRECTORY = new File(BungeeCord.getInstance().getPluginsFolder() + File.separator + "ChatData");
+	public static final File DIRECTORY = new File(Amachat.DIRECTORY + File.separator + "Chat");
 
 	protected long id;
 	protected Config config;
@@ -30,8 +31,8 @@ public abstract class Chat {
 	protected boolean chat, quit;
 	protected String joinMessage, quitMessage;
 	protected String format;
-	protected Map<FormatType, String> messageFormats = new HashMap<>();
-	protected Set<String> processorNames;
+	protected Map<MessageFormatType, String> messageFormats = new HashMap<>();
+	protected Set<Processor> processors = new HashSet<>();
 	protected Set<UUID> users, mutedUsers, bannedUsers;
 	protected Map<UUID, Long> expires = new HashMap<>();
 
@@ -55,19 +56,13 @@ public abstract class Chat {
 		configuration.set("JoinMessage", joinMessage);
 		configuration.set("QuitMessage", quitMessage);
 		configuration.set("Format", Coloring.inverse(format));
-
-		messageFormats.forEach((k, v) -> {
-			String type = k.name();
-			configuration.set(Character.toUpperCase(type.charAt(0)) + type.substring(1), Coloring.inverse(v));
-		});
-
-		configuration.set("Processors", processorNames);
+		messageFormats.forEach((type, messageFormat) -> configuration.set(type.toCamelCase(), Coloring.inverse(messageFormat)));
+		configuration.set("Processors", ProcessorManager.toProcessorNames(processors));
 		config.set("Users", users);
 		config.set("MutedUsers", mutedUsers);
 		config.set("BannedUsers", bannedUsers);
-
 		config.set("Expires", null);
-		expires.forEach((k, v) -> configuration.set("Expires." + k.toString(), v.longValue()));
+		expires.forEach((uuid, time) -> configuration.set("Expires." + uuid.toString(), time.longValue()));
 
 		config.apply();
 	}
@@ -88,15 +83,12 @@ public abstract class Chat {
 		joinMessage = configuration.getString("JoinMessage");
 		quitMessage = configuration.getString("QuitMessage");
 		format = Coloring.coloring(configuration.getString("Format"));
-
 		messageFormats.clear();
-		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(FormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));
-
-		processorNames = config.getStringSet("Processors");
+		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(MessageFormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));
+		processors = ProcessorManager.fromProcessorNames(configuration.getStringList("Processors"));
 		users = config.getUniqueIdSet("Users");
 		mutedUsers = config.getUniqueIdSet("MutedUsers");
 		bannedUsers = config.getUniqueIdSet("BannedUsers");
-
 		expires.clear();
 		configuration.getSection("Expires").getKeys().forEach(uuid -> expires.put(UUID.fromString(uuid), configuration.getLong("Expires." + uuid)));
 	}
@@ -132,7 +124,7 @@ public abstract class Chat {
 			return;
 		}
 
-		ChatManager.sendMessage(users, ProcessorManager.process(user, message, messageFormats, processorNames), true);
+		ChatManager.sendMessage(users, ProcessorManager.processAll(this, user, message), true);
 	}
 
 	public void broadcast(String message){
@@ -142,7 +134,7 @@ public abstract class Chat {
 			return;
 		}
 
-		ChatManager.sendMessage(users, ProcessorManager.process(message, processorNames), true);
+		ChatManager.sendMessage(users, ProcessorManager.processAll(this, message), true);
 	}
 
 	public Config getConfig(){
@@ -173,32 +165,40 @@ public abstract class Chat {
 		this.chat = chat;
 	}
 
-	public String getFormat(FormatType type){
+	public String getFormat(){
+		return format;
+	}
+
+	public Map<MessageFormatType, String> getMessageFormats(){
+		return Collections.unmodifiableMap(messageFormats);
+	}
+
+	public String getMessageFormat(MessageFormatType type){
 		return messageFormats.get(type);
 	}
 
-	public void setFormat(FormatType type, String format){
+	public void setMessageFormat(MessageFormatType type, String format){
 		messageFormats.put(type, format);
 	}
 
-	public Set<String> getProcessors(){
-		return processorNames;
+	public Set<Processor> getProcessors(){
+		return Collections.unmodifiableSet(processors);
 	}
 
-	public boolean hasProcessor(String processorName){
-		return processorNames.contains(processorName);
+	public boolean hasProcessor(Processor processor){
+		return processors.contains(processor);
 	}
 
-	public void addProcessor(String processorName){
-		processorNames.add(processorName);
+	public void addProcessor(Processor processor){
+		processors.add(processor);
 	}
 
-	public void removeProcessor(String processorName){
-		processorNames.remove(processorName);
+	public void removeProcessor(Processor processor){
+		processors.remove(processor);
 	}
 
 	public Set<UUID> getUsers(){
-		return users;
+		return Collections.unmodifiableSet(users);
 	}
 
 	public boolean isJoin(UUID uuid){
@@ -221,7 +221,7 @@ public abstract class Chat {
 	}
 
 	public Set<UUID> getMutedUsers(){
-		return mutedUsers;
+		return Collections.unmodifiableSet(mutedUsers);
 	}
 
 	public boolean isMuted(UUID uuid){
@@ -238,7 +238,7 @@ public abstract class Chat {
 	}
 
 	public Set<UUID> getBannedUsers(){
-		return bannedUsers;
+		return Collections.unmodifiableSet(bannedUsers);
 	}
 
 	public boolean isBanned(UUID uuid){
@@ -252,6 +252,19 @@ public abstract class Chat {
 
 	public void unban(UUID uuid){
 		bannedUsers.add(uuid);
+	}
+
+	public static enum MessageFormatType {
+
+		NORMAL,
+		JAPANIZE,
+		TRANSLATE;
+
+		public String toCamelCase(){
+			String name = this.name();
+			return name.charAt(0) + name.toLowerCase().substring(1);
+		}
+
 	}
 
 }

@@ -15,7 +15,6 @@ import java.util.Map;
 
 import amata1219.amachat.Amachat;
 import amata1219.amachat.Util;
-import net.md_5.bungee.config.Configuration;
 
 public final class GoogleIME implements Processor {
 
@@ -89,8 +88,7 @@ public final class GoogleIME implements Processor {
 	}
 
 	public static void load(){
-		Configuration config = Amachat.getConfig().getConfiguration().getSection("GoogleIME");
-		if(config.getBoolean("Enable"))
+		if(Amachat.getConfig().getConfiguration().getBoolean("GoogleIME.Enable"))
 			ProcessorManager.register(new GoogleIME());
 	}
 

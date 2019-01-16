@@ -11,7 +11,7 @@ import amata1219.amachat.config.Config;
 import amata1219.amachat.event.ChatEvent;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
-import amata1219.amachat.processor.FormatType;
+import amata1219.amachat.processor.Coloring;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.User;
 import net.md_5.bungee.config.Configuration;
@@ -60,14 +60,20 @@ public class RoomChat extends Chat {
 
 		aliases = configuration.getString("Aliases");
 		description = configuration.getString("Description");
+		chat = configuration.getBoolean("CanChat");
+		quit = configuration.getBoolean("CanQuit");
 		joinMessage = configuration.getString("JoinMessage");
 		quitMessage = configuration.getString("QuitMessage");
-		inviteMessage = configuration.getString("InviteMessage");
-
+		format = Coloring.coloring(configuration.getString("Format"));
 		messageFormats.clear();
-		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(FormatType.valueOf(type.toUpperCase()), configuration.getString("Formats." + type)));
-
-		processorNames = config.getStringSet("Processors");
+		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(MessageFormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));
+		processors = ProcessorManager.fromProcessorNames(configuration.getStringList("Processors"));
+		users = config.getUniqueIdSet("Users");
+		mutedUsers = config.getUniqueIdSet("MutedUsers");
+		bannedUsers = config.getUniqueIdSet("BannedUsers");
+		expires.clear();
+		configuration.getSection("Expires").getKeys().forEach(uuid -> expires.put(UUID.fromString(uuid), configuration.getLong("Expires." + uuid)));
+		inviteMessage = configuration.getString("InviteMessage");
 	}
 
 	@Override
@@ -87,7 +93,7 @@ public class RoomChat extends Chat {
 			return;
 		}
 
-		ChatManager.sendMessage(users, ProcessorManager.process(user, message, messageFormats, processorNames), true);
+		ChatManager.sendMessage(users, ProcessorManager.processAll(this, user, message), true);
 	}
 
 	@Override
