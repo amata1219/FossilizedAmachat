@@ -35,7 +35,7 @@ public final class GoogleTranslate implements Processor {
 		if(!processor.checkTranslate())
 			return;
 
-		ProcessorManager.register(processor);
+		ProcessorManager.registerProcessor(processor);
 	}
 
 	@Override

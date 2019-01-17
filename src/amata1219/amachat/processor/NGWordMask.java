@@ -24,7 +24,7 @@ public final class NGWordMask implements Processor {
 
 		processor.words = configuration.getStringList("NGWords");
 
-		ProcessorManager.register(processor);
+		ProcessorManager.registerProcessor(processor);
 	}
 
 	@Override

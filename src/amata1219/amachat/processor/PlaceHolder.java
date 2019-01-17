@@ -28,7 +28,7 @@ public final class PlaceHolder implements Processor {
 			processor.holders.put(strs[0], strs[1]);
 		});
 
-		ProcessorManager.register(processor);
+		ProcessorManager.registerProcessor(processor);
 	}
 
 	@Override

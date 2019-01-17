@@ -8,7 +8,7 @@ JoinMessage: ''
 QuitMessage: ''
 Format: '[&a[chat]]&r[player]&a:&r [message]'
 MessageFormats:
-  Normal: '[original]'
+  Normal: '[converted]'
   Japanize: '[converted]&7([original])'
   Translate: '[converted]&7([original])'
 Processors: []

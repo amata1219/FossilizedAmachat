@@ -1,7 +1,6 @@
 package amata1219.amachat.chat;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -170,7 +169,7 @@ public abstract class Chat {
 	}
 
 	public Map<MessageFormatType, String> getMessageFormats(){
-		return Collections.unmodifiableMap(messageFormats);
+		return messageFormats;
 	}
 
 	public String getMessageFormat(MessageFormatType type){
@@ -182,7 +181,7 @@ public abstract class Chat {
 	}
 
 	public Set<Processor> getProcessors(){
-		return Collections.unmodifiableSet(processors);
+		return processors;
 	}
 
 	public boolean hasProcessor(Processor processor){
@@ -198,7 +197,7 @@ public abstract class Chat {
 	}
 
 	public Set<UUID> getUsers(){
-		return Collections.unmodifiableSet(users);
+		return users;
 	}
 
 	public boolean isJoin(UUID uuid){
@@ -221,7 +220,7 @@ public abstract class Chat {
 	}
 
 	public Set<UUID> getMutedUsers(){
-		return Collections.unmodifiableSet(mutedUsers);
+		return mutedUsers;
 	}
 
 	public boolean isMuted(UUID uuid){
@@ -238,7 +237,7 @@ public abstract class Chat {
 	}
 
 	public Set<UUID> getBannedUsers(){
-		return Collections.unmodifiableSet(bannedUsers);
+		return bannedUsers;
 	}
 
 	public boolean isBanned(UUID uuid){

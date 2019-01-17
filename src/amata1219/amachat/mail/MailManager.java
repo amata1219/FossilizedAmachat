@@ -8,9 +8,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import amata1219.amachat.Amachat;
+import amata1219.amachat.chat.Chat.MessageFormatType;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.processor.Coloring;
-import amata1219.amachat.processor.MessageFormatType;
 import amata1219.amachat.processor.Processor;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.UserManager;
@@ -19,7 +19,7 @@ import net.md_5.bungee.config.Configuration;
 public class MailManager {
 
 	private static Config config;
-	private static final HashMap<MessageFormatType, String> formats = new HashMap<>();
+	private static final HashMap<MessageFormatType, String> FORMATS = new HashMap<>();
 	private static final Set<String> processorNames = new HashSet<>();
 	private static final Set<AbstractMail> mails = new HashSet<>();
 
@@ -35,11 +35,11 @@ public class MailManager {
 
 		Config config = Amachat.getConfig();
 		processorNames.addAll(config.getStringSet("Mail.Processors"));
-		Processor coloring = ProcessorManager.get(Coloring.NAME);
+		Processor coloring = ProcessorManager.getProcessor(Coloring.NAME);
 		Configuration configuration = config.getConfiguration().getSection("Mail");
-		formats.put(MessageFormatType.NORMAL, coloring.process(configuration.getString("Format.Normal")));
-		formats.put(MessageFormatType.JAPANIZED, coloring.process(configuration.getString("Format.Japanized")));
-		formats.put(MessageFormatType.TRANSLATION, coloring.process(configuration.getString("Format.Translation")));
+		FORMATS.put(MessageFormatType.NORMAL, coloring.process(configuration.getString("Format.Normal")));
+		FORMATS.put(MessageFormatType.JAPANIZE, coloring.process(configuration.getString("Format.Japanized")));
+		FORMATS.put(MessageFormatType.TRANSLATE, coloring.process(configuration.getString("Format.Translation")));
 	}
 
 	public static boolean isEnable(){
@@ -59,7 +59,7 @@ public class MailManager {
 	}
 
 	public static String process(Mail mail){
-		return ProcessorManager.process(UserManager.getPlayerName(mail.getSender()), mail.getText(), formats, processorNames);
+		return ProcessorManager.process(UserManager.getPlayerName(mail.getSender()), mail.getText(), FORMATS, processorNames);
 	}
 
 	public static Set<AbstractMail> getMails(){

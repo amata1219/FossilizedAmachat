@@ -89,7 +89,7 @@ public final class GoogleIME implements Processor {
 
 	public static void load(){
 		if(Amachat.getConfig().getConfiguration().getBoolean("GoogleIME.Enable"))
-			ProcessorManager.register(new GoogleIME());
+			ProcessorManager.registerProcessor(new GoogleIME());
 	}
 
 	@Override
