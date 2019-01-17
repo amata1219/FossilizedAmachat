@@ -110,7 +110,7 @@ public class ProcessorManager {
 		return AFT_FILTERS.get(filterName);
 	}
 
-	public static String processAll(Chat chat, User user, String original){
+	public static TextComponent processAll(Chat chat, User user, String original){
 		AtomicReference<String> text = new AtomicReference<>(original);
 
 		Filter filter = DEFAULT_FILTERS.get(Coloring.NAME);
@@ -143,7 +143,7 @@ public class ProcessorManager {
 		return applyFormat(chat, user, text.get());
 	}
 
-	public static String processAll(Chat chat, String original){
+	public static TextComponent processAll(Chat chat, String original){
 		AtomicReference<String> text = new AtomicReference<>(original);
 
 		Filter filter = DEFAULT_FILTERS.get(Coloring.NAME);
@@ -170,35 +170,63 @@ public class ProcessorManager {
 		else if((filter = DEFAULT_FILTERS.get(GoogleTranslate.NAME)).shouldFilter(chat, null, text.get()))
 			text.set(getProcessor(GoogleTranslate.NAME).process(text.get()));
 
-		return text.get();
+		return Util.toTextComponent(text.get());
 	}
 
-	public static String applyFormat(Chat chat, User user, String text){
-		String[] args0 = chat.getFormat().split(PlaceHolders.CHAT);
-		TextComponent message = null;
-		if(args0.length <= 1){
+	public static TextComponent processAll(String playerName, String original, Map<MessageFormatType, String> messageFormats, Set<Processor> processors){
 
-		}else{
-			for(int i = 0; i < args0.length; i++){
-				String[] args1 = args0[i].split(PlaceHolders.PLAYER);
-				if(args1.length <= 1)
-					continue;
+	}
 
-				TextComponent tc0 = Util.toTextComponent(args1[0]);
-				for(int j = 1; j < args1.length; j++){
-					TextComponent tc1 = Util.toTextComponent(user.getName());
-					tc1.setClickEvent(new ClickEvent(Action.SUGGEST_COMMAND, "/message " + user.getName()));
-					tc1.addExtra(args1[j]);
-					tc0.addExtra(tc1);
+	public static TextComponent applyFormat(Chat chat, User user, String text){
+		return applyFormat(chat, user.getName(), text);
+	}
+
+	public static TextComponent applyFormat(Chat chat, String playerName, String text){
+		String[] a = chat.getFormat().replace("[message]", text).split(PlaceHolders.CHAT);
+		if(a.length == 0)
+			return Util.emptyTextComponent();
+
+		TextComponent base = Util.emptyTextComponent();
+		if(a.length == 1){
+			String[] b = a[0].split(PlaceHolders.PLAYER);
+			if(b.length == 0)
+				return Util.emptyTextComponent();
+
+			if(b.length == 1){
+				base.addExtra(b[0]);
+			}else{
+				for(int i = 0; i < b.length - 1; i++){
+					base.addExtra(b[i]);
+					TextComponent add = Util.toTextComponent(playerName);
+					add.setClickEvent(new ClickEvent(Action.SUGGEST_COMMAND, "/message " + playerName));
+					base.addExtra(add);
 				}
-				/*TextComponent aliases = Util.toTextComponent(chat.getAliases());
-				aliases.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/amachat move " + chat.getId()));
-				message.addExtra(aliases);
-				message.addExtra(args[i]);*/
+				base.addExtra(b[b.length - 1]);
 			}
+		}else{
+			for(int i = 0; i < a.length - 1; i++){
+				String[] b = a[0].split(PlaceHolders.PLAYER);
+				if(b.length == 0)
+					return Util.emptyTextComponent();
+
+				if(b.length == 1){
+					base.addExtra(b[0]);
+				}else{
+					for(int j = 0; j < b.length - 1; j++){
+						base.addExtra(b[i]);
+						TextComponent add = Util.toTextComponent(playerName);
+						add.setClickEvent(new ClickEvent(Action.SUGGEST_COMMAND, "/message " + playerName));
+						base.addExtra(add);
+					}
+					base.addExtra(b[b.length - 1]);
+				}
+				TextComponent add = Util.toTextComponent(chat.getAliases());
+				add.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/amachat move " + chat.getId()));
+				base.addExtra(add);
+			}
+			base.addExtra(a[a.length - 1]);
 		}
-		format.replaceAll(PlaceHolders.MESSAGE, text);
-		return chat.getFormat().replace(PlaceHolders.CHAT, chat.getAliases()).replace(PlaceHolders.PLAYER, user.getName());
+		return base;
 	}
 
 	public static Set<Processor> fromProcessorNames(Collection<String> processorNames){

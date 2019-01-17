@@ -3,6 +3,7 @@ package amata1219.amachat.mail;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -19,9 +20,9 @@ import net.md_5.bungee.config.Configuration;
 public class MailManager {
 
 	private static Config config;
-	private static final HashMap<MessageFormatType, String> FORMATS = new HashMap<>();
-	private static final Set<String> processorNames = new HashSet<>();
-	private static final Set<AbstractMail> mails = new HashSet<>();
+	private static final Map<MessageFormatType, String> FORMATS = new HashMap<>();
+	private static final Set<Processor> PROCESSORS = new HashSet<>();
+	private static final Set<AbstractMail> MAILS = new HashSet<>();
 
 	private MailManager(){
 
@@ -33,13 +34,11 @@ public class MailManager {
 
 		config = Config.load(new File(Amachat.getPlugin().getDataFolder(), "mails.yml"), "mails.yml");
 
-		Config config = Amachat.getConfig();
-		processorNames.addAll(config.getStringSet("Mail.Processors"));
-		Processor coloring = ProcessorManager.getProcessor(Coloring.NAME);
-		Configuration configuration = config.getConfiguration().getSection("Mail");
-		FORMATS.put(MessageFormatType.NORMAL, coloring.process(configuration.getString("Format.Normal")));
-		FORMATS.put(MessageFormatType.JAPANIZE, coloring.process(configuration.getString("Format.Japanized")));
-		FORMATS.put(MessageFormatType.TRANSLATE, coloring.process(configuration.getString("Format.Translation")));
+		Configuration configuration = Amachat.getConfig().getConfiguration().getSection("Mail");
+		PROCESSORS.addAll(ProcessorManager.fromProcessorNames(configuration.getStringList("Processors")));
+		FORMATS.put(MessageFormatType.NORMAL, Coloring.coloring(configuration.getString("Format.Normal")));
+		FORMATS.put(MessageFormatType.JAPANIZE, Coloring.coloring(configuration.getString("Format.Japanized")));
+		FORMATS.put(MessageFormatType.TRANSLATE, Coloring.coloring(configuration.getString("Format.Translation")));
 	}
 
 	public static boolean isEnable(){
@@ -59,23 +58,23 @@ public class MailManager {
 	}
 
 	public static String process(Mail mail){
-		return ProcessorManager.process(UserManager.getPlayerName(mail.getSender()), mail.getText(), FORMATS, processorNames);
+		return ProcessorManager.processAll(UserManager.getPlayerName(mail.getSender()), mail.getText(), FORMATS, PROCESSORS);
 	}
 
 	public static Set<AbstractMail> getMails(){
-		return mails;
+		return MAILS;
 	}
 
 	public static Set<AbstractMail> getMails(UUID receiver){
-		return mails.stream().filter(mail -> mail.getReceiver().equals(receiver)).collect(Collectors.toSet());
+		return MAILS.stream().filter(mail -> mail.getReceiver().equals(receiver)).collect(Collectors.toSet());
 	}
 
 	public static Set<AbstractMail> getMails(Class<?> clazz){
-		return mails.stream().filter(clazz::isInstance).collect(Collectors.toSet());
+		return MAILS.stream().filter(clazz::isInstance).collect(Collectors.toSet());
 	}
 
 	public static Set<AbstractMail> getMails(UUID receiver, Class<?> clazz){
-		return mails.stream().filter(mail -> mail.getReceiver().equals(receiver)).filter(clazz::isInstance).collect(Collectors.toSet());
+		return MAILS.stream().filter(mail -> mail.getReceiver().equals(receiver)).filter(clazz::isInstance).collect(Collectors.toSet());
 	}
 
 	public void displayMails(UUID receiver){
@@ -83,12 +82,12 @@ public class MailManager {
 	}
 
 	public static void addMail(Mail mail){
-		mails.add(mail);
+		MAILS.add(mail);
 		mail.save(true);
 	}
 
 	public void removeMail(Mail mail){
-		mails.remove(mail);
+		MAILS.remove(mail);
 		mail.remove(true);
 	}
 
@@ -96,7 +95,7 @@ public class MailManager {
 		Config config = Amachat.getConfig();
 
 		getMails(receiver).forEach(mail -> {
-			mails.remove(mail);
+			MAILS.remove(mail);
 			mail.remove(false);
 		});
 

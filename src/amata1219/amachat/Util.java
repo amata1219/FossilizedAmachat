@@ -21,6 +21,10 @@ public class Util {
 		return new TextComponent(message);
 	}
 
+	public static TextComponent emptyTextComponent(){
+		return toTextComponent("");
+	}
+
 	public static byte[] toByteArray(Object... objs){
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 
