@@ -91,20 +91,35 @@ public class ChatManager {
 	}
 
 	public static void sendMessage(UUID uuid, String message, boolean logging){
+		sendMessage(uuid, Util.toTextComponent(message), logging);
+	}
+
+	public static void sendMessage(UUID uuid, TextComponent message, boolean logging){
 		User player = UserManager.getUser(uuid);
-		if(player != null)
-			player.sendMessage(Util.toTextComponent(message));
+		if(player == null)
+			return;
+
+		player.sendMessage(message);
+
+		if(logging)
+			Amachat.info(message.getText());
+	}
+
+	public static void sendMessage(Set<UUID> uuids, String message, boolean logging){
+		TextComponent component = Util.toTextComponent(message);
+		for(User user : UserManager.getUsersByUniqueIdSet(uuids))
+			user.sendMessage(component);
 
 		if(logging)
 			Amachat.info(message);
 	}
 
-	public static void sendMessage(Set<UUID> uuids, String message, boolean logging){
-		TextComponent component = Util.toTextComponent(message);
-		UserManager.getUsersByUniqueIdSet(uuids).forEach(player -> player.sendMessage(component));
+	public static void sendMessage(Set<UUID> uuids, TextComponent message, boolean logging){
+		for(User user : UserManager.getUsersByUniqueIdSet(uuids))
+			user.sendMessage(message);
 
 		if(logging)
-			Amachat.info(message);
+			Amachat.info(message.getText());
 	}
 
 }

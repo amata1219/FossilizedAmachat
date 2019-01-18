@@ -17,7 +17,7 @@ public final class GoogleTranslate implements Processor {
 
 	public static final String NAME = "GoogleTranslate";
 
-	private String url;
+	private static String url;
 
 	private GoogleTranslate(){
 
@@ -28,14 +28,12 @@ public final class GoogleTranslate implements Processor {
 		if(!configuration.getBoolean("Enable"))
 			return;
 
-		GoogleTranslate processor = new GoogleTranslate();
+		GoogleTranslate.url = configuration.getString("ScriptURL") + "/exec?text=$1&source=&target=$2";
 
-		processor.url = configuration.getString("ScriptURL") + "/exec?text=$1&source=&target=$2";
-
-		if(!processor.checkTranslate())
+		if(!GoogleTranslate.checkTranslate())
 			return;
 
-		ProcessorManager.registerProcessor(processor);
+		ProcessorManager.registerProcessor(new GoogleTranslate());
 	}
 
 	@Override
@@ -45,6 +43,18 @@ public final class GoogleTranslate implements Processor {
 
 	@Override
 	public String process(String text) {
+		return GoogleTranslate.translate(text);
+	}
+
+	public static boolean canTranslate(String text){
+		return LanguageCode.has(text);
+	}
+
+	public static boolean checkTranslate(){
+		return translate("Hello", LanguageCode.JA) != null;
+	}
+
+	public static String translate(String text){
 		LanguageCode code = LanguageCode.get(text);
 		if(code == null)
 			return text;
@@ -52,15 +62,7 @@ public final class GoogleTranslate implements Processor {
 		return translate(text, code);
 	}
 
-	public static boolean canTranslate(String text){
-		return LanguageCode.has(text);
-	}
-
-	public boolean checkTranslate(){
-		return translate("Hello", LanguageCode.JA) != null;
-	}
-
-	public String translate(String text, LanguageCode target){
+	public static String translate(String text, LanguageCode target){
 		if(text.isEmpty())
 			return "";
 
@@ -68,7 +70,7 @@ public final class GoogleTranslate implements Processor {
 		BufferedReader reader = null;
 		StringBuilder builder = new StringBuilder();
 		try{
-			URL url = new URL(this.url.replace("$2", target.name()).replace("$1", URLEncoder.encode(text, "UTF-8")));
+			URL url = new URL(GoogleTranslate.url.replace("$2", target.name()).replace("$1", URLEncoder.encode(text, "UTF-8")));
 
 			con = (HttpURLConnection) url.openConnection();
 

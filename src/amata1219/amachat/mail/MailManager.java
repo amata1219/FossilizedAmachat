@@ -9,18 +9,23 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import amata1219.amachat.Amachat;
-import amata1219.amachat.chat.Chat.MessageFormatType;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.processor.Coloring;
+import amata1219.amachat.processor.MessageFormatType;
 import amata1219.amachat.processor.Processor;
 import amata1219.amachat.processor.ProcessorManager;
+import amata1219.amachat.processor.SupportTextProcessing;
 import amata1219.amachat.user.UserManager;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.config.Configuration;
 
-public class MailManager {
+public class MailManager implements SupportTextProcessing {
+
+	private static MailManager instance;
 
 	private static Config config;
-	private static final Map<MessageFormatType, String> FORMATS = new HashMap<>();
+	private static String format;
+	private static final Map<MessageFormatType, String> MESSAGE_FORMATS = new HashMap<>();
 	private static final Set<Processor> PROCESSORS = new HashSet<>();
 	private static final Set<AbstractMail> MAILS = new HashSet<>();
 
@@ -36,9 +41,11 @@ public class MailManager {
 
 		Configuration configuration = Amachat.getConfig().getConfiguration().getSection("Mail");
 		PROCESSORS.addAll(ProcessorManager.fromProcessorNames(configuration.getStringList("Processors")));
-		FORMATS.put(MessageFormatType.NORMAL, Coloring.coloring(configuration.getString("Format.Normal")));
-		FORMATS.put(MessageFormatType.JAPANIZE, Coloring.coloring(configuration.getString("Format.Japanized")));
-		FORMATS.put(MessageFormatType.TRANSLATE, Coloring.coloring(configuration.getString("Format.Translation")));
+		MESSAGE_FORMATS.put(MessageFormatType.NORMAL, Coloring.coloring(configuration.getString("Format.Normal")));
+		MESSAGE_FORMATS.put(MessageFormatType.JAPANIZE, Coloring.coloring(configuration.getString("Format.Japanized")));
+		MESSAGE_FORMATS.put(MessageFormatType.TRANSLATE, Coloring.coloring(configuration.getString("Format.Translation")));
+
+		instance = new MailManager();
 	}
 
 	public static boolean isEnable(){
@@ -57,8 +64,8 @@ public class MailManager {
 		return System.currentTimeMillis() - mail.getTimestamp() >= getExpirationDays() * 86400000;
 	}
 
-	public static String process(Mail mail){
-		return ProcessorManager.processAll(UserManager.getPlayerName(mail.getSender()), mail.getText(), FORMATS, PROCESSORS);
+	public static TextComponent process(Mail mail){
+		return ProcessorManager.processAll(instance, UserManager.getPlayerName(mail.getSender()), mail.getText());
 	}
 
 	public static Set<AbstractMail> getMails(){
@@ -78,7 +85,8 @@ public class MailManager {
 	}
 
 	public void displayMails(UUID receiver){
-		getMails(receiver).forEach(AbstractMail::trySend);
+		for(AbstractMail mail : getMails(receiver))
+			mail.trySend();
 	}
 
 	public static void addMail(Mail mail){
@@ -100,6 +108,51 @@ public class MailManager {
 		});
 
 		config.apply();
+	}
+
+	@Override
+	public String getFormat(){
+		return format;
+	}
+
+	@Override
+	public void setFormat(String format){
+		MailManager.format = format;
+	}
+
+	@Override
+	public Map<MessageFormatType, String> getMessageFormats(){
+		return MESSAGE_FORMATS;
+	}
+
+	@Override
+	public String getMessageFormat(MessageFormatType type){
+		return MESSAGE_FORMATS.get(type);
+	}
+
+	@Override
+	public void setMessageFormat(MessageFormatType type, String format){
+		MESSAGE_FORMATS.put(type, format);
+	}
+	@Override
+
+	public Set<Processor> getProcessors(){
+		return PROCESSORS;
+	}
+
+	@Override
+	public boolean hasProcessor(String processorName){
+		return PROCESSORS.contains(ProcessorManager.getProcessor(processorName));
+	}
+
+	@Override
+	public void addProcessor(Processor processor){
+		PROCESSORS.add(processor);
+	}
+
+	@Override
+	public void removeProcessor(String processorName){
+		PROCESSORS.remove(ProcessorManager.getProcessor(processorName));
 	}
 
 }

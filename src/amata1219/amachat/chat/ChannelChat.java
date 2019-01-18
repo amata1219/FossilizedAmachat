@@ -7,6 +7,7 @@ import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.processor.Coloring;
+import amata1219.amachat.processor.MessageFormatType;
 import amata1219.amachat.processor.ProcessorManager;
 import net.md_5.bungee.config.Configuration;
 
@@ -50,9 +51,9 @@ public class ChannelChat extends Prefix {
 		configuration.set("Aliases", aliases);
 		configuration.set("Description", description);
 		configuration.set("CanChat", chat);
-		configuration.set("CanQuit", quit);
+		configuration.set("CanQuit", leave);
 		configuration.set("JoinMessage", joinMessage);
-		configuration.set("QuitMessage", quitMessage);
+		configuration.set("LeaveMessage", leaveMessage);
 		configuration.set("Format", Coloring.inverse(format));
 		messageFormats.forEach((type, messageFormat) -> configuration.set(type.toCamelCase(), Coloring.inverse(messageFormat)));
 		configuration.set("Processors", ProcessorManager.toProcessorNames(processors));
@@ -78,9 +79,9 @@ public class ChannelChat extends Prefix {
 		aliases = configuration.getString("Aliases");
 		description = configuration.getString("Description");
 		chat = configuration.getBoolean("CanChat");
-		quit = configuration.getBoolean("CanQuit");
+		leave = configuration.getBoolean("CanQuit");
 		joinMessage = configuration.getString("JoinMessage");
-		quitMessage = configuration.getString("QuitMessage");
+		leaveMessage = configuration.getString("LeaveMessage");
 		format = Coloring.coloring(configuration.getString("Format"));
 		messageFormats.clear();
 		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(MessageFormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));

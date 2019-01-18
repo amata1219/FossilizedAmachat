@@ -15,20 +15,22 @@ import amata1219.amachat.event.ChatEvent;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.Coloring;
+import amata1219.amachat.processor.MessageFormatType;
 import amata1219.amachat.processor.Processor;
 import amata1219.amachat.processor.ProcessorManager;
+import amata1219.amachat.processor.SupportTextProcessing;
 import amata1219.amachat.user.User;
 import net.md_5.bungee.config.Configuration;
 
-public abstract class Chat {
+public abstract class Chat implements SupportTextProcessing {
 
 	public static final File DIRECTORY = new File(Amachat.DIRECTORY + File.separator + "Chat");
 
 	protected long id;
 	protected Config config;
 	protected String aliases, description;
-	protected boolean chat, quit;
-	protected String joinMessage, quitMessage;
+	protected boolean chat, leave;
+	protected String joinMessage, leaveMessage;
 	protected String format;
 	protected Map<MessageFormatType, String> messageFormats = new HashMap<>();
 	protected Set<Processor> processors = new HashSet<>();
@@ -51,9 +53,9 @@ public abstract class Chat {
 		configuration.set("Aliases", aliases);
 		configuration.set("Description", description);
 		configuration.set("CanChat", chat);
-		configuration.set("CanQuit", quit);
+		configuration.set("CanQuit", leave);
 		configuration.set("JoinMessage", joinMessage);
-		configuration.set("QuitMessage", quitMessage);
+		configuration.set("LeaveMessage", leaveMessage);
 		configuration.set("Format", Coloring.inverse(format));
 		messageFormats.forEach((type, messageFormat) -> configuration.set(type.toCamelCase(), Coloring.inverse(messageFormat)));
 		configuration.set("Processors", ProcessorManager.toProcessorNames(processors));
@@ -78,9 +80,9 @@ public abstract class Chat {
 		aliases = configuration.getString("Aliases");
 		description = configuration.getString("Description");
 		chat = configuration.getBoolean("CanChat");
-		quit = configuration.getBoolean("CanQuit");
+		leave = configuration.getBoolean("CanQuit");
 		joinMessage = configuration.getString("JoinMessage");
-		quitMessage = configuration.getString("QuitMessage");
+		leaveMessage = configuration.getString("LeaveMessage");
 		format = Coloring.coloring(configuration.getString("Format"));
 		messageFormats.clear();
 		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(MessageFormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));
@@ -164,36 +166,49 @@ public abstract class Chat {
 		this.chat = chat;
 	}
 
+	@Override
 	public String getFormat(){
 		return format;
 	}
 
+	@Override
+	public void setFormat(String format){
+		this.format = format;
+	}
+
+	@Override
 	public Map<MessageFormatType, String> getMessageFormats(){
 		return messageFormats;
 	}
 
+	@Override
 	public String getMessageFormat(MessageFormatType type){
 		return messageFormats.get(type);
 	}
 
+	@Override
 	public void setMessageFormat(MessageFormatType type, String format){
 		messageFormats.put(type, format);
 	}
+	@Override
 
 	public Set<Processor> getProcessors(){
 		return processors;
 	}
 
-	public boolean hasProcessor(Processor processor){
-		return processors.contains(processor);
+	@Override
+	public boolean hasProcessor(String processorName){
+		return processors.contains(ProcessorManager.getProcessor(processorName));
 	}
 
+	@Override
 	public void addProcessor(Processor processor){
 		processors.add(processor);
 	}
 
-	public void removeProcessor(Processor processor){
-		processors.remove(processor);
+	@Override
+	public void removeProcessor(String processorName){
+		processors.remove(ProcessorManager.getProcessor(processorName));
 	}
 
 	public Set<UUID> getUsers(){
@@ -209,9 +224,9 @@ public abstract class Chat {
 		ChatManager.sendMessage(uuid, joinMessage, false);
 	}
 
-	public void quit(UUID uuid){
+	public void leave(UUID uuid){
 		users.remove(uuid);
-		ChatManager.sendMessage(uuid, quitMessage, false);
+		ChatManager.sendMessage(uuid, leaveMessage, false);
 	}
 
 	public void kick(UUID uuid, String reason){
@@ -251,19 +266,6 @@ public abstract class Chat {
 
 	public void unban(UUID uuid){
 		bannedUsers.add(uuid);
-	}
-
-	public static enum MessageFormatType {
-
-		NORMAL,
-		JAPANIZE,
-		TRANSLATE;
-
-		public String toCamelCase(){
-			String name = this.name();
-			return name.charAt(0) + name.toLowerCase().substring(1);
-		}
-
 	}
 
 }
