@@ -21,7 +21,7 @@ import net.md_5.bungee.config.Configuration;
 public class ActionBot extends Bot implements Listener4Bot {
 
 	public static final String NAME = "ActionBot";
-	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "ActionBots");
+	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + NAME);
 
 	private Set<Action> actions = new HashSet<>();
 

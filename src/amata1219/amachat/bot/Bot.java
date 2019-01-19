@@ -10,7 +10,7 @@ import amata1219.amachat.config.Config;
 
 public abstract class Bot {
 
-	public static final File DIRECTORY = new File(Amachat.getPlugin().getDataFolder() + File.separator + "BotData");
+	public static final File DIRECTORY = new File(Amachat.DIRECTORY + File.separator + "Bot");
 
 	protected long id;
 	protected Config config;

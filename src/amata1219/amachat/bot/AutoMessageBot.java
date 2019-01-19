@@ -11,7 +11,7 @@ import net.md_5.bungee.config.Configuration;
 public class AutoMessageBot extends TaskBot {
 
 	public static final String NAME = "AutoMessageBot";
-	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "AutoMessageBot");
+	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + NAME);
 
 	private List<String> messages;
 	private long interval;

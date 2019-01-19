@@ -128,13 +128,18 @@ public class Util {
 			int newCapacity = (characters.length << 1) + 2;
 			if(newCapacity - capacity < 0)
 				newCapacity = capacity;
-			if(newCapacity < 0 || MAX_LENGTH - newCapacity > 0)
+			if(newCapacity <= 0 || MAX_LENGTH - newCapacity < 0)
 				newCapacity = MAX_LENGTH;
 			return newCapacity;
 		}
 
 		public String getString(){
 			return new String(characters);
+		}
+
+		@Override
+		public String toString(){
+			return getString();
 		}
 
 		public int count(){

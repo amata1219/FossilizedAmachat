@@ -18,7 +18,7 @@ import net.md_5.bungee.config.Configuration;
 public class ChatBot extends Bot implements Listener4Bot {
 
 	public static final String NAME = "ChatBot";
-	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + "ChatBot");
+	public static final File DIRECTORY = new File(Bot.DIRECTORY + File.separator + NAME);
 
 	private HashMap<String, String> responces = new HashMap<>();
 

@@ -3,7 +3,7 @@ ForceJoinChat: []
 NGWordMask:
   Enable:
   NGWords:
-  - '死ね'
+  - 'uruse'
 PlaceHolder:
   Enable:
   Holders:

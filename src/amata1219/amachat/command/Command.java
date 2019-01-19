@@ -1,5 +1,7 @@
 package amata1219.amachat.command;
 
+import com.google.common.collect.ImmutableMap;
+
 import amata1219.amachat.Util;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
@@ -10,6 +12,10 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public abstract class Command extends net.md_5.bungee.api.plugin.Command {
+
+	public static final ImmutableMap<Integer, String> PERMISSIONS = new ImmutableMap.Builder<Integer, String>()
+			.put(3237038, "info")
+			.build();
 
 	public Command(String name, String permission, String[] aliases) {
 		super(name, permission, aliases);
@@ -72,16 +78,17 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 			return new Result<Long>(result);
 		}
 
-		public boolean isChat(int index){
-			return getChat(index) != null;
-		}
-
 		public Chat getChat(int index){
 			Result<Long> result = getNumberResult(index);
 			if(result.isInvalid())
 				return null;
 
 			return ChatManager.getChat(result.getResult());
+		}
+
+		public Chat getChat(int index, User user){
+			Chat chat = getChat(index);
+			return chat == null ? user.getDestination() : chat;
 		}
 
 	}

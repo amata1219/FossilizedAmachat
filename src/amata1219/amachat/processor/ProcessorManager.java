@@ -190,13 +190,20 @@ public class ProcessorManager {
 
 	public static Set<Processor> fromProcessorNames(Collection<String> processorNames){
 		Set<Processor> processors = new HashSet<>();
-		processorNames.forEach(processorName -> processors.add(getProcessor(processorName)));
+		for(String processorName : processorNames){
+			Processor processor = getProcessor(processorName);
+			if(processor != null)
+				processors.add(processor);
+		}
 		return processors;
 	}
 
 	public static Set<String> toProcessorNames(Collection<Processor> processors){
 		Set<String> processorNames = new HashSet<>();
-		processors.forEach(processor -> processorNames.add(processor.getName()));
+		for(Processor processor : processors){
+			if(PROCESSORS.containsKey(processor.getName()))
+				processorNames.add(processor.getName());
+		}
 		return processorNames;
 	}
 

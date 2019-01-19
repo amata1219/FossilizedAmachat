@@ -47,12 +47,10 @@ public class Amachat extends Plugin implements Listener {
 		if(!DIRECTORY.exists())
 			DIRECTORY.mkdirs();
 
-		getProxy().getPluginManager().registerListener(this, this);
-
 		commands.put("amachat", new AmachatCommand("amachat", "amachat.command.amachat", "achat", "amc", "chat", "ch"));
 		commands.put("broadcast", new BroadcastCommand("broadcast", "amachat.command.broadcast", "bcast", "bc"));
 		commands.put("message", new MessageCommand("message", "amachat.command.message", "msg"));
-		commands.values().forEach(command -> getProxy().getPluginManager().registerCommand(this, command));
+		commands.values().stream().forEach(Amachat::registerCommand);
 
 		config = Config.load(new File(getDataFolder() + File.separator + "config.yml"), "config.yml");
 
@@ -74,6 +72,8 @@ public class Amachat extends Plugin implements Listener {
 		 * UserManager
 		 * MailManager
 		 */
+
+		getProxy().getPluginManager().registerListener(this, this);
 	}
 
 	@Override
@@ -105,9 +105,11 @@ public class Amachat extends Plugin implements Listener {
 
 	public static void registerCommand(Command command){
 		plugin.commands.put(command.getName(), command);
+		plugin.getProxy().getPluginManager().registerCommand(plugin, command);
 	}
 
 	public static void unregisterCommand(String commandName){
+		plugin.getProxy().getPluginManager().unregisterCommand(plugin.commands.get(commandName));
 		plugin.commands.remove(commandName);
 	}
 
@@ -116,18 +118,11 @@ public class Amachat extends Plugin implements Listener {
 		if(sender == null || message == null)
 			return;
 
-		final User player = UserManager.getUser(sender.getUniqueId());
-		if(player == null && !UserManager.fix(sender))
+		final User user = UserManager.getUser(sender.getUniqueId());
+		if(user == null && !UserManager.fix(sender))
 			return;
 
-		Amachat.getPlugin().getExecutorService().execute(new Runnable(){
-
-			@Override
-			public void run() {
-				player.getDestination().chat(player, message);
-			}
-
-		});
+		Amachat.getPlugin().getExecutorService().execute(() -> user.getDestination().chat(user, message));
 	}
 
 	public static void info(String message){

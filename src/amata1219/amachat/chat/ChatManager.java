@@ -61,6 +61,10 @@ public class ChatManager {
 		}
 	}
 
+	public static boolean isUsedId(long id){
+		return CHAT_MAP.containsKey(id);
+	}
+
 	public static Chat getChat(long id){
 		return CHAT_MAP.get(id);
 	}
@@ -126,6 +130,25 @@ public class ChatManager {
 
 		if(logging)
 			Amachat.info(message.getText());
+	}
+
+	public static Set<Chat> fromChatIds(Collection<Long> ids){
+		Set<Chat> chat = new HashSet<>();
+		for(long id : ids){
+			Chat c = getChat(id);
+			if(c != null)
+				chat.add(c);
+		}
+		return chat;
+	}
+
+	public static Set<Long> toChatIds(Collection<Chat> chat){
+		Set<Long> ids = new HashSet<>();
+		for(Chat c : chat){
+			if(isUsedId(c.getId()))
+				ids.add(c.getId());
+		}
+		return ids;
 	}
 
 }

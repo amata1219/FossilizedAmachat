@@ -9,6 +9,7 @@ import amata1219.amachat.Util;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.chat.VanillaChat;
+import amata1219.amachat.command.Command;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
 import net.md_5.bungee.BungeeCord;
@@ -23,7 +24,7 @@ public class User {
 	private Config config;
 	private boolean mute, ban, autoJapanize;
 	private long destination;
-	private Set<Long> mutedChat;
+	private Set<Chat> mutedChat;
 	private Set<UUID> mutedUsers;
 
 	private User(UUID uuid){
@@ -56,7 +57,7 @@ public class User {
 		configuration.set("Ban", ban);
 		configuration.set("AutoJapanize", autoJapanize);
 		configuration.set("LastDestination", destination);
-		configuration.set("MutedChat", mutedChat);
+		configuration.set("MutedChat", ChatManager.toChatIds(mutedChat));
 		configuration.set("MutedUsers", Util.toStringSet(mutedUsers));
 
 		config.apply();
@@ -72,7 +73,7 @@ public class User {
 		ban = configuration.getBoolean("Banned");
 		autoJapanize = configuration.getBoolean("AutoJapanize");
 		destination = configuration.getLong("LastDestination");
-		mutedChat = config.getLongSet("MutedChat");
+		mutedChat = ChatManager.fromChatIds(config.getLongSet("MutedChat"));
 		mutedUsers = config.getUniqueIdSet("MutedUsers");
 	}
 
@@ -143,29 +144,74 @@ public class User {
 		this.autoJapanize = autoJapanize;
 	}
 
-	public long getDestinationId(){
-		return destination;
-	}
-
-	public void setDestinationId(long address){
-		this.destination = address;
-	}
-
 	public Chat getDestination(){
 		Chat chat = ChatManager.getChat(destination);
 		return chat == null ? ChatManager.getChat(VanillaChat.ID) : chat;
+	}
+
+	public long getDestinationId(){
+		return destination;
 	}
 
 	public void setDestination(Chat chat){
 		destination = chat.getId();
 	}
 
+	public void setDestination(long address){
+		this.destination = address;
+	}
+
 	public void removeDestination(){
 		destination = VanillaChat.ID;
 	}
 
+	public Set<Chat> getMutedChat(){
+		return mutedChat;
+	}
+
+	public boolean isMutedChat(Chat chat){
+		return mutedChat.contains(chat);
+	}
+
+	public void addMutedChat(Chat chat){
+		mutedChat.add(chat);
+	}
+
+	public void addMutedChat(long id){
+		Chat chat = ChatManager.getChat(id);
+		if(chat != null)
+			addMutedChat(chat);
+	}
+
+	public void removeMutedChat(Chat chat){
+		mutedChat.remove(chat);
+	}
+
+	public void removeMutedChat(long id){
+		mutedChat.remove(id);
+	}
+
 	public Set<UUID> getMutedUsers(){
 		return mutedUsers;
+	}
+
+	public boolean isMutedUser(UUID uuid){
+		return mutedUsers.contains(uuid);
+	}
+
+	public void addMutedUser(UUID uuid){
+		mutedUsers.add(uuid);
+	}
+
+	public void removeMutedUser(UUID uuid){
+		mutedUsers.remove(uuid);
+	}
+
+	public boolean hasPermission(int hashCode){
+		if(hashCode == 0)
+			return true;
+
+		return toProxiedPlayer().hasPermission(Command.PERMISSIONS.get(hashCode));
 	}
 
 }
