@@ -1,5 +1,14 @@
 package amata1219.amachat.command;
 
+import java.util.UUID;
+
+import amata1219.amachat.Util.TextBuilder;
+import amata1219.amachat.chat.Chat;
+import amata1219.amachat.chat.ChatManager;
+import amata1219.amachat.chat.VanillaChat;
+import amata1219.amachat.user.User;
+import amata1219.amachat.user.UserManager;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 
 public class AmachatCommand extends Command {
@@ -13,23 +22,23 @@ public class AmachatCommand extends Command {
 	 *   info [id]
 	 *   mute [id]
 	 *   see
+	 *   chat
 	 *
 	 */
 
 	/*
-	 * switch(Command.get(args, 0)){
-		case "info":
+	 * 	info - 3237038
 
-		case "join":
+		join - 3267882
 
-		case "leave":
+		leave - 102846135
 
-		case "see":
+		chat - 3052376
 
-		case "move":
+		move - 3357649
 
-		case "mute":
-		}
+		mute - 3363353
+
 	 */
 
 	public AmachatCommand(String name, String permission, String... aliases) {
@@ -42,15 +51,46 @@ public class AmachatCommand extends Command {
 
 	@Override
 	public void execute(CommandSender sender, String[] args) {
-		Cmd cmd = Cmd.newInstance(args);
-		switch(cmd.get(0)){
-		case "test":
-			if(cmd.isNumber(1)){
+		User user = Command.isUser(sender);
+		if(user == null)
+			return;
 
+		Arguments arguments = new Arguments(args);
+		Chat chat = arguments.getChat(1);
+		if(chat == null)
+			chat = user.getDestination();
+
+		switch(arguments.getHashCodeOfArgument(0)){
+		case 3237038://info
+			TextBuilder builder = TextBuilder.newInstanace()
+			.append("§b")
+			.append(chat.getAliases())
+			.append("§7(ID: ")
+			.append(chat.getId())
+			.append(")")
+			.newLine()
+			.append("§7")
+			.append(chat.getDescription())
+			.newLine()
+			.append("§7参加者:");
+			for(UUID uuid : chat.getUsers()){
+				builder.append(" ");
+				builder.append(UserManager.getPlayerName(uuid), builder.getLastLineLength() > 50);
 			}
+			user.sendMessage(builder.getString());
 			break;
-		case "info":
+		case 3267882://join
+			user.sendMessage(chat.tryJoin(user.getUniqueId()));
 			break;
+		case 102846135://leave
+			user.sendMessage(chat.tryLeave(user.getUniqueId()));
+			break;
+		case 3052376://chat
+			chat.chat(user, arguments.concatenateArguments(arguments.isChat(1) ? 2 : 1, arguments.args.length - 1));
+			break;
+		case 3357649://move
+
+		case 3363353://mute
 		}
 	}
 

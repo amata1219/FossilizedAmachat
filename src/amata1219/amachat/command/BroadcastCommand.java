@@ -28,6 +28,6 @@ public class BroadcastCommand extends Command {
 		if(args.length == 0)
 			user.warn("メッセージを指定して下さい");
 		else
-			user.getAddress().broadcast(String.join(" ", args));
+			user.getDestination().broadcast(String.join(" ", args));
 	}
 }

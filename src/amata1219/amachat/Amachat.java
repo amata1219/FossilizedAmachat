@@ -100,7 +100,7 @@ public class Amachat extends Plugin implements Listener {
 
 		Command command = commands.get(suggestions.get(0).toLowerCase());
 		if(command != null)
-			command.complete((CommandSender) connection, Util.toArgs(suggestions));
+			command.complete((CommandSender) connection, Util.toArguments(suggestions));
 	}
 
 	public static void registerCommand(Command command){
@@ -124,7 +124,7 @@ public class Amachat extends Plugin implements Listener {
 
 			@Override
 			public void run() {
-				player.getAddress().chat(player, message);
+				player.getDestination().chat(player, message);
 			}
 
 		});

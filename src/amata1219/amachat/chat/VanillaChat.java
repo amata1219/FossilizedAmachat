@@ -1,6 +1,7 @@
 package amata1219.amachat.chat;
 
 import java.io.File;
+import java.util.UUID;
 
 import amata1219.amachat.config.Config;
 import amata1219.amachat.config.Initializer;
@@ -38,6 +39,16 @@ public class VanillaChat extends Chat {
 	@Override
 	public long getId(){
 		return VanillaChat.ID;
+	}
+
+	@Override
+	public String tryJoin(UUID uuid){
+		return null;
+	}
+
+	@Override
+	public String tryLeave(UUID uuid){
+		return null;
 	}
 
 }

@@ -107,10 +107,29 @@ public class RoomChat extends Chat {
 	}
 
 	@Override
-	public void join(UUID uuid){
-		guests.remove(uuid);
+	public String tryJoin(UUID uuid){
+		if(users.contains(uuid))
+			return "§cこのチャットに既に参加しています。";
+
+		if(bannedUsers.contains(uuid))
+			return "§cこのチャットには参加出来ません。";
+
+		if(!guests.contains(uuid))
+			return "§cこのチャットに招待されていません。";
+
 		users.add(uuid);
 		ChatManager.sendMessage(uuid, joinMessage, false);
+		return null;
+	}
+
+	@Override
+	public String tryLeave(UUID uuid){
+		if(!users.contains(uuid))
+			return "§cこのチャットに参加していません。";
+
+		users.remove(uuid);
+		ChatManager.sendMessage(uuid, leaveMessage, false);
+		return null;
 	}
 
 	@Override

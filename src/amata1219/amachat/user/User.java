@@ -22,7 +22,7 @@ public class User {
 	private final UUID uuid;
 	private Config config;
 	private boolean mute, ban, autoJapanize;
-	private long address;
+	private long destination;
 	private Set<Long> mutedChat;
 	private Set<UUID> mutedUsers;
 
@@ -55,7 +55,7 @@ public class User {
 		configuration.set("Mute", mute);
 		configuration.set("Ban", ban);
 		configuration.set("AutoJapanize", autoJapanize);
-		configuration.set("LastAddress", address);
+		configuration.set("LastDestination", destination);
 		configuration.set("MutedChat", mutedChat);
 		configuration.set("MutedUsers", Util.toStringSet(mutedUsers));
 
@@ -71,7 +71,7 @@ public class User {
 		mute = configuration.getBoolean("Mute");
 		ban = configuration.getBoolean("Banned");
 		autoJapanize = configuration.getBoolean("AutoJapanize");
-		address = configuration.getLong("LastAddress");
+		destination = configuration.getLong("LastDestination");
 		mutedChat = config.getLongSet("MutedChat");
 		mutedUsers = config.getUniqueIdSet("MutedUsers");
 	}
@@ -89,10 +89,13 @@ public class User {
 	}
 
 	public void chat(String message){
-		getAddress().chat(this, message);
+		getDestination().chat(this, message);
 	}
 
 	public void sendMessage(TextComponent component){
+		if(component == null)
+			return;
+
 		toProxiedPlayer().sendMessage(component);
 	}
 
@@ -140,25 +143,25 @@ public class User {
 		this.autoJapanize = autoJapanize;
 	}
 
-	public long getAddressId(){
-		return address;
+	public long getDestinationId(){
+		return destination;
 	}
 
-	public void setAddressId(long address){
-		this.address = address;
+	public void setDestinationId(long address){
+		this.destination = address;
 	}
 
-	public Chat getAddress(){
-		Chat chat = ChatManager.getChat(address);
+	public Chat getDestination(){
+		Chat chat = ChatManager.getChat(destination);
 		return chat == null ? ChatManager.getChat(VanillaChat.ID) : chat;
 	}
 
-	public void setAddress(Chat chat){
-		address = chat.getId();
+	public void setDestination(Chat chat){
+		destination = chat.getId();
 	}
 
-	public void removeAddress(){
-		address = 0L;
+	public void removeDestination(){
+		destination = VanillaChat.ID;
 	}
 
 	public Set<UUID> getMutedUsers(){

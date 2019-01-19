@@ -219,14 +219,28 @@ public abstract class Chat implements SupportTextProcessing {
 		return users.contains(uuid);
 	}
 
-	public void join(UUID uuid){
+	public String tryJoin(UUID uuid){
+		if(users.contains(uuid))
+			return "§cこのチャットに既に参加しています。";
+
+		if(bannedUsers.contains(uuid))
+			return "§cこのチャットには参加出来ません。";
+
 		users.add(uuid);
 		ChatManager.sendMessage(uuid, joinMessage, false);
+		return null;
 	}
 
-	public void leave(UUID uuid){
+	public String tryLeave(UUID uuid){
+		if(!users.contains(uuid))
+			return "§cこのチャットに参加していません。";
+
+		if(ChatManager.isForceJoinChat(id))
+			return "§cこのチャットは退出出来ません。";
+
 		users.remove(uuid);
 		ChatManager.sendMessage(uuid, leaveMessage, false);
+		return null;
 	}
 
 	public void kick(UUID uuid, String reason){

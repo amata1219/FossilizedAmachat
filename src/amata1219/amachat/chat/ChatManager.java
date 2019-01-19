@@ -32,6 +32,8 @@ public class ChatManager {
 		listFiles = arg0;
 	}
 
+	private static Set<Long> forceJoinChatSet = new HashSet<>();
+
 	public static void load(Class<?> clazz){
 		clazz.asSubclass(Chat.class);
 
@@ -88,6 +90,10 @@ public class ChatManager {
 
 	public static void unregisterChat(long id){
 		CHAT_MAP.remove(id);
+	}
+
+	public static boolean isForceJoinChat(long id){
+		return forceJoinChatSet.contains(id);
 	}
 
 	public static void sendMessage(UUID uuid, String message, boolean logging){
