@@ -16,6 +16,19 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 
 	public static final ImmutableMap<Integer, String> PERMISSIONS = new ImmutableMap.Builder<Integer, String>()
 			.put(3237038, "amachat.amachat.info")
+			.put(105, "amachat.amachat.info")
+			.put(3267882, "amachat.amachat.join")
+			.put(106, "amachat.amachat.join")
+			.put(102846135, "amachat.amachat.leave")
+			.put(3052376, "amachat.amachat.chat")
+			.put(3357649, "amachat.amachat.move")
+			.put(109, "amachat.amachat.move")
+			.put(106797705, "amachat.amachat.pmute")
+			.put(112, "amachat.amachat.pmute")
+			.put(94791932, "amachat.amachat.cmute")
+			.put(99, "amachat.amachat.cmute")
+			.put(3322014, "amachat.amachat.list")
+			.put(108, "amachat.amachat.list")
 			.build();
 
 	public Command(String name, String permission, String[] aliases) {
@@ -81,11 +94,7 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 		}
 
 		public Chat getChat(int index){
-			Result<Long> result = getNumberResult(index);
-			if(result.isInvalid())
-				return null;
-
-			return ChatManager.getChat(result.getResult());
+			return ChatManager.getChat(getArgument(index));
 		}
 
 		public Chat getChat(int index, User user){

@@ -11,8 +11,6 @@ import amata1219.amachat.config.Config;
 import amata1219.amachat.event.ChatEvent;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
-import amata1219.amachat.processor.Coloring;
-import amata1219.amachat.processor.MessageFormatType;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.User;
 import net.md_5.bungee.config.Configuration;
@@ -22,7 +20,7 @@ public class RoomChat extends Chat {
 	public static final String NAME = "RoomChat";
 
 	protected UUID owner;
-	protected Set<UUID> guests = new HashSet<>();
+	protected Set<UUID> invitees = new HashSet<>();
 	protected String inviteMessage;
 
 	protected RoomChat(final long id){
@@ -35,7 +33,7 @@ public class RoomChat extends Chat {
 		(chat.config = Config.load(new File(Chat.DIRECTORY, "room.yml"), "chat.yml")).reload();
 
 		chat.owner = owner;
-		chat.guests = guests;
+		chat.invitees = guests;
 
 		return chat;
 	}
@@ -55,25 +53,10 @@ public class RoomChat extends Chat {
 		if(config == null)
 			return;
 
+		super.reload();
+
 		config.reload();
-
 		Configuration configuration = config.getConfiguration();
-
-		aliases = configuration.getString("Aliases");
-		description = configuration.getString("Description");
-		chat = configuration.getBoolean("CanChat");
-		leave = configuration.getBoolean("CanQuit");
-		joinMessage = configuration.getString("JoinMessage");
-		leaveMessage = configuration.getString("LeaveMessage");
-		format = Coloring.coloring(configuration.getString("Format"));
-		messageFormats.clear();
-		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(MessageFormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));
-		processors = ProcessorManager.fromProcessorNames(configuration.getStringList("Processors"));
-		users = config.getUniqueIdSet("Users");
-		mutedUsers = config.getUniqueIdSet("MutedUsers");
-		bannedUsers = config.getUniqueIdSet("BannedUsers");
-		expires.clear();
-		configuration.getSection("Expires").getKeys().forEach(uuid -> expires.put(UUID.fromString(uuid), configuration.getLong("Expires." + uuid)));
 		inviteMessage = configuration.getString("InviteMessage");
 	}
 
@@ -114,7 +97,7 @@ public class RoomChat extends Chat {
 		if(bannedUsers.contains(uuid))
 			return "§cこのチャットには参加出来ません。";
 
-		if(!guests.contains(uuid))
+		if(!invitees.contains(uuid))
 			return "§cこのチャットに招待されていません。";
 
 		users.add(uuid);
@@ -176,25 +159,25 @@ public class RoomChat extends Chat {
 		return users.isEmpty();
 	}
 
-	public Set<UUID> getGuests(){
-		return guests;
+	public Set<UUID> getInvitees(){
+		return invitees;
 	}
 
 	public boolean isInvited(UUID uuid){
-		return guests.contains(uuid);
+		return invitees.contains(uuid);
 	}
 
-	public void invite(UUID uuid){
-		addGuest(uuid);
+	public void tryInvite(UUID uuid){
+		addInvitee(uuid);
 		ChatManager.sendMessage(uuid, inviteMessage, false);
 	}
 
-	public void addGuest(UUID uuid){
-		guests.add(uuid);
+	public void addInvitee(UUID uuid){
+		invitees.add(uuid);
 	}
 
-	public void removeGuest(UUID uuid){
-		guests.remove(uuid);
+	public void removeInvitee(UUID uuid){
+		invitees.remove(uuid);
 	}
 
 }

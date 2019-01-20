@@ -12,8 +12,6 @@ import amata1219.amachat.config.Initializer;
 import amata1219.amachat.event.ChatEvent;
 import amata1219.amachat.prefix.Prefix;
 import amata1219.amachat.prefix.PrefixManager;
-import amata1219.amachat.processor.Coloring;
-import amata1219.amachat.processor.MessageFormatType;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
@@ -56,25 +54,10 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 		if(config == null)
 			return;
 
+		super.save();
+
 		Configuration configuration = config.getConfiguration();
-
-		configuration.set("Aliases", aliases);
-		configuration.set("Description", description);
-		configuration.set("CanChat", chat);
-		configuration.set("CanQuit", leave);
-		configuration.set("JoinMessage", joinMessage);
-		configuration.set("LeaveMessage", leaveMessage);
-		configuration.set("Format", Coloring.inverse(format));
-		messageFormats.forEach((type, messageFormat) -> configuration.set(type.toCamelCase(), Coloring.inverse(messageFormat)));
-		configuration.set("Processors", ProcessorManager.toProcessorNames(processors));
-		config.set("Users", users);
-		config.set("MutedUsers", mutedUsers);
-		config.set("BannedUsers", bannedUsers);
-		config.set("Expires", null);
-		expires.forEach((uuid, time) -> configuration.set("Expires." + uuid.toString(), time.longValue()));
-		configuration.set("Prefix", prefix);
 		configuration.set("Permissions", permissions);
-
 		config.apply();
 	}
 
@@ -83,26 +66,9 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 		if(config == null)
 			return;
 
+		super.reload();
+
 		config.reload();
-
-		Configuration configuration = config.getConfiguration();
-
-		aliases = configuration.getString("Aliases");
-		description = configuration.getString("Description");
-		chat = configuration.getBoolean("CanChat");
-		leave = configuration.getBoolean("CanQuit");
-		joinMessage = configuration.getString("JoinMessage");
-		leaveMessage = configuration.getString("LeaveMessage");
-		format = Coloring.coloring(configuration.getString("Format"));
-		messageFormats.clear();
-		configuration.getSection("Formats").getKeys().forEach(type -> messageFormats.put(MessageFormatType.valueOf(type.toUpperCase()), Coloring.coloring(configuration.getString("Formats." + type))));
-		processors = ProcessorManager.fromProcessorNames(configuration.getStringList("Processors"));
-		users = config.getUniqueIdSet("Users");
-		mutedUsers = config.getUniqueIdSet("MutedUsers");
-		bannedUsers = config.getUniqueIdSet("BannedUsers");
-		expires.clear();
-		configuration.getSection("Expires").getKeys().forEach(uuid -> expires.put(UUID.fromString(uuid), configuration.getLong("Expires." + uuid)));
-		prefix = configuration.getString("Prefix");
 		permissions = config.getStringSet("Permissions");
 	}
 

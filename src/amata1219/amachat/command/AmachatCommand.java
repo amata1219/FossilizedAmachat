@@ -7,47 +7,33 @@ import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 
 public class AmachatCommand extends Command {
-
-	/*
-	 * amachat
-	 *   reload [id]
-	 *   join [id]
-	 *   move [id]
-	 *   leave [id]
-	 *   info [id]
-	 *   mute [id]
-	 *   chat
-	 *   list
-	 */
 
 	/*
 	 * 	info - 3237038, i - 105
 
 		join - 3267882, j - 106
 
-		leave - 102846135, l - 108
+		leave - 102846135
 
 		chat - 3052376
 
-		change - -1361636432, c - 99
-
 		move - 3357649, m - 109
 
-		mute - 3363353
+		pmute - 106797705, p - 112
 
-		list - 3322014
+		cmute - 94791932, c - 99
+
+		list - 3322014, l - 108
 
 	 */
 
 	public static void main(String[] args){
-		hash("i");
-		hash("j");
-		hash("l");
+		hash("p");
 		hash("c");
-		hash("m");
 		System.out.close();
 	}
 
@@ -83,70 +69,98 @@ public class AmachatCommand extends Command {
 
 			break;
 		case 105:
-		case 3237038://info
+		case 3237038:
 			chat = arguments.getChat(1, user);
-			TextBuilder builder = TextBuilder.newInstanace()
-			.append("§b")
+			TextBuilder info = TextBuilder.newInstanace()
+			.append(ChatColor.BLUE)
 			.append(chat.getAliases())
-			.append("§7(ID: ")
+			.append(ChatColor.GRAY)
+			.append("(ID: ")
 			.append(chat.getId())
 			.append(")")
 			.newLine()
-			.append("§7")
+			.append(ChatColor.GRAY)
 			.append(chat.getDescription())
 			.newLine()
-			.append("§7参加者:");
+			.append(ChatColor.GRAY)
+			.append("参加者:");
 			for(UUID uuid : chat.getUsers()){
-				builder.append(" ");
-				builder.append(UserManager.getPlayerName(uuid), builder.getLastLineLength() > 40);
+				info.append(" ");
+				info.append(UserManager.getPlayerName(uuid), info.getLastLineLength() > 40);
 			}
-			user.sendMessage(builder.getString());
+			user.sendMessage(info.getString());
 			break;
 		case 106:
-		case 3267882://join
+		case 3267882:
 			if((chat = arguments.getChat(1)) != null)
 				user.sendMessage(chat.tryJoin(user.getUniqueId()));
 			break;
-		case 108:
-		case 102846135://leave
+		case 102846135:
 			if((chat = arguments.getChat(1)) != null)
 				user.sendMessage(chat.tryLeave(user.getUniqueId()));
 			break;
-		case 3052376://chat
-			chat = arguments.getChat(1);
-			(chat == null ? user.getDestination() : chat).chat(user, arguments.concatenateArguments(chat == null ? 1 : 2, arguments.args.length - 1));
+		case 3052376:
+			chat = arguments.getChat(1, user);
+			chat.chat(user, arguments.concatenateArguments(chat == null ? 1 : 2, arguments.args.length - 1));
 			break;
-		case 99:
-		case -1361636432://change
-			chat = arguments.getChat(1);
+		case 109:
+		case 3357649:
+			chat = ChatManager.getChat(arguments.getArgument(1));
 			if(chat == null){
 				user.warn("移動先のチャットを指定して下さい。");
 				break;
 			}
 			String from = user.getDestination().getAliases();
 			user.setDestination(chat);
-			user.success("チャットを移動しました§7(" + from + " > " + chat.getAliases() + ")§b。");
+			user.success(from + "から" + chat.getAliases() + "に移動しました。");
 			break;
-		case 109:
-		case 3357649://move
-			chat = ChatManager.getChat(arguments.getArgument(1));
-			if(chat == null){
-				user.warn("移動先のチャットを指定して下さい。");
-				break;
+		case 112:
+		case 106797705:
+			String playerName = arguments.getArgument(1);
+			if(!UserManager.isExist(playerName)){
+				user.warn("指定されたプレイヤーは存在しません。");
+				return;
 			}
-			String frm = user.getDestination().getAliases();
-			user.setDestination(chat);
-			user.success("チャットを移動しました§7(" + frm + " > " + chat.getAliases() + ")§b。");
-			break;
-		case 3363353://mute
+
+			UUID playerUUID = UserManager.getUniqueId(playerName);
+			if(user.isMutedUser(playerUUID)){
+				user.removeMutedUser(playerUUID);
+				user.success(playerName + "さんのミュートを解除しました。");
+			}else{
+				user.addMutedUser(playerUUID);
+				user.success(playerName + "さんをミュートしました。");
+			}
+		case 99:
+		case 94791932:
 			chat = arguments.getChat(1, user);
 			if(user.getMutedChat().contains(chat)){
-				user.addMutedChat(chat);
-				user.success("チャットをミュートを解除しました§7(" + chat.getAliases() + ")§b。");
-			}else{
 				user.removeMutedChat(chat);
-				user.success("チャットをミュートしました§7(" + chat.getAliases() + ")§b。");
+				user.success(chat.getAliases() + "のミュートを解除しました。");
+			}else{
+				user.addMutedChat(chat);
+				user.success(chat.getAliases() + "をミュートしました。");
 			}
+			break;
+		case 108:
+		case 3322014:
+			TextBuilder list = TextBuilder.newInstanace()
+			.append(ChatColor.BLUE)
+			.append("チャット一覧");
+			boolean b = false;
+			for(Chat ch : ChatManager.getChatCollection()){
+				if(!ch.isHide()){
+					list.newLine()
+					.append(b ? ChatColor.RESET : ChatColor.GRAY)
+					.append("・")
+					.append(ch.getAliases())
+					.append(" - ")
+					.append(ch.getDescription());
+					b = !b;
+				}
+			}
+			user.sendMessage(list.getString());
+			break;
+		default:
 			break;
 		}
 	}

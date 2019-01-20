@@ -115,6 +115,10 @@ public class Util {
 			return append(String.valueOf(l));
 		}
 
+		public TextBuilder append(ChatColor color){
+			return append(color.toString());
+		}
+
 		public TextBuilder newLine(){
 			return append("\n");
 		}
