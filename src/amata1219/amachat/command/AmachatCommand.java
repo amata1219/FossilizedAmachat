@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import amata1219.amachat.Util.TextBuilder;
 import amata1219.amachat.chat.Chat;
+import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
 import net.md_5.bungee.api.CommandSender;
@@ -23,15 +24,17 @@ public class AmachatCommand extends Command {
 	 */
 
 	/*
-	 * 	info - 3237038
+	 * 	info - 3237038, i - 105
 
-		join - 3267882
+		join - 3267882, j - 106
 
-		leave - 102846135
+		leave - 102846135, l - 108
 
 		chat - 3052376
 
-		move - 3357649
+		change - -1361636432, c - 99
+
+		move - 3357649, m - 109
 
 		mute - 3363353
 
@@ -40,12 +43,16 @@ public class AmachatCommand extends Command {
 	 */
 
 	public static void main(String[] args){
-		hash("");
+		hash("i");
+		hash("j");
+		hash("l");
+		hash("c");
+		hash("m");
 		System.out.close();
 	}
 
 	public static void hash(String s){
-		System.out.println(s.hashCode());
+		System.out.println(s + " - " + s.hashCode());
 		System.out.flush();
 	}
 
@@ -75,6 +82,7 @@ public class AmachatCommand extends Command {
 		case 0:
 
 			break;
+		case 105:
 		case 3237038://info
 			chat = arguments.getChat(1, user);
 			TextBuilder builder = TextBuilder.newInstanace()
@@ -94,10 +102,12 @@ public class AmachatCommand extends Command {
 			}
 			user.sendMessage(builder.getString());
 			break;
+		case 106:
 		case 3267882://join
 			if((chat = arguments.getChat(1)) != null)
 				user.sendMessage(chat.tryJoin(user.getUniqueId()));
 			break;
+		case 108:
 		case 102846135://leave
 			if((chat = arguments.getChat(1)) != null)
 				user.sendMessage(chat.tryLeave(user.getUniqueId()));
@@ -106,7 +116,8 @@ public class AmachatCommand extends Command {
 			chat = arguments.getChat(1);
 			(chat == null ? user.getDestination() : chat).chat(user, arguments.concatenateArguments(chat == null ? 1 : 2, arguments.args.length - 1));
 			break;
-		case 3357649://move
+		case 99:
+		case -1361636432://change
 			chat = arguments.getChat(1);
 			if(chat == null){
 				user.warn("移動先のチャットを指定して下さい。");
@@ -115,6 +126,17 @@ public class AmachatCommand extends Command {
 			String from = user.getDestination().getAliases();
 			user.setDestination(chat);
 			user.success("チャットを移動しました§7(" + from + " > " + chat.getAliases() + ")§b。");
+			break;
+		case 109:
+		case 3357649://move
+			chat = ChatManager.getChat(arguments.getArgument(1));
+			if(chat == null){
+				user.warn("移動先のチャットを指定して下さい。");
+				break;
+			}
+			String frm = user.getDestination().getAliases();
+			user.setDestination(chat);
+			user.success("チャットを移動しました§7(" + frm + " > " + chat.getAliases() + ")§b。");
 			break;
 		case 3363353://mute
 			chat = arguments.getChat(1, user);

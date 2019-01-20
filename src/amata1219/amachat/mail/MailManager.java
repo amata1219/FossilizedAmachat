@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import amata1219.amachat.Amachat;
 import amata1219.amachat.config.Config;
@@ -73,15 +72,30 @@ public class MailManager implements SupportTextProcessing {
 	}
 
 	public static Set<AbstractMail> getMails(UUID receiver){
-		return MAILS.stream().filter(mail -> mail.getReceiver().equals(receiver)).collect(Collectors.toSet());
+		Set<AbstractMail> mails = new HashSet<>();
+		for(AbstractMail mail : MAILS){
+			if(mail.getReceiver().equals(receiver))
+				mails.add(mail);
+		}
+		return mails;
 	}
 
 	public static Set<AbstractMail> getMails(Class<?> clazz){
-		return MAILS.stream().filter(clazz::isInstance).collect(Collectors.toSet());
+		Set<AbstractMail> mails = new HashSet<>();
+		for(AbstractMail mail : MAILS){
+			if(clazz.isInstance(mail))
+				mails.add(mail);
+		}
+		return mails;
 	}
 
 	public static Set<AbstractMail> getMails(UUID receiver, Class<?> clazz){
-		return MAILS.stream().filter(mail -> mail.getReceiver().equals(receiver)).filter(clazz::isInstance).collect(Collectors.toSet());
+		Set<AbstractMail> mails = new HashSet<>();
+		for(AbstractMail mail : MAILS){
+			if(mail.getReceiver().equals(receiver) && clazz.isInstance(mail))
+				mails.add(mail);
+		}
+		return mails;
 	}
 
 	public void displayMails(UUID receiver){
@@ -102,10 +116,10 @@ public class MailManager implements SupportTextProcessing {
 	public void clearMails(UUID receiver){
 		Config config = Amachat.getConfig();
 
-		getMails(receiver).forEach(mail -> {
+		for(AbstractMail mail : getMails(receiver)){
 			MAILS.remove(mail);
 			mail.remove(false);
-		});
+		}
 
 		config.apply();
 	}

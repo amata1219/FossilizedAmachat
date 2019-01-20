@@ -29,7 +29,7 @@ public abstract class Chat implements SupportTextProcessing {
 	protected long id;
 	protected Config config;
 	protected String aliases, description;
-	protected boolean chat, leave;
+	protected boolean chat, hide;
 	protected String joinMessage, leaveMessage;
 	protected String format;
 	protected Map<MessageFormatType, String> messageFormats = new HashMap<>();
@@ -53,7 +53,7 @@ public abstract class Chat implements SupportTextProcessing {
 		configuration.set("Aliases", aliases);
 		configuration.set("Description", description);
 		configuration.set("CanChat", chat);
-		configuration.set("CanQuit", leave);
+		configuration.set("Hide", hide);
 		configuration.set("JoinMessage", joinMessage);
 		configuration.set("LeaveMessage", leaveMessage);
 		configuration.set("Format", Coloring.inverse(format));
@@ -80,7 +80,7 @@ public abstract class Chat implements SupportTextProcessing {
 		aliases = configuration.getString("Aliases");
 		description = configuration.getString("Description");
 		chat = configuration.getBoolean("CanChat");
-		leave = configuration.getBoolean("CanQuit");
+		hide = configuration.getBoolean("Hide");
 		joinMessage = configuration.getString("JoinMessage");
 		leaveMessage = configuration.getString("LeaveMessage");
 		format = Coloring.coloring(configuration.getString("Format"));
@@ -164,6 +164,14 @@ public abstract class Chat implements SupportTextProcessing {
 
 	public void setChat(boolean chat){
 		this.chat = chat;
+	}
+
+	public boolean isHide(){
+		return hide;
+	}
+
+	public void setHide(boolean hide){
+		this.hide = hide;
 	}
 
 	@Override

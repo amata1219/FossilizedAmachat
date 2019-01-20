@@ -3,6 +3,7 @@ package amata1219.amachat.command;
 import com.google.common.collect.ImmutableMap;
 
 import amata1219.amachat.Util;
+import amata1219.amachat.Util.TextBuilder;
 import amata1219.amachat.chat.Chat;
 import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.user.User;
@@ -14,7 +15,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 
 	public static final ImmutableMap<Integer, String> PERMISSIONS = new ImmutableMap.Builder<Integer, String>()
-			.put(3237038, "info")
+			.put(3237038, "amachat.amachat.info")
 			.build();
 
 	public Command(String name, String permission, String[] aliases) {
@@ -55,13 +56,14 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 		}
 
 		public String concatenateArguments(int from, int to){
-			String s = "";
 			if(from > to)
-				return s;
+				return "";
 
-			for(; from <= to; from++)
-				s = getArgument(from);
-			return s;
+			TextBuilder builder = TextBuilder.newInstanace();
+			for(; from <= (to >= args.length ? args.length : to); from++)
+				builder.append(" ").append(getArgument(from));
+
+			return builder.getString().trim();
 		}
 
 		public int getHashCodeOfArgument(int index){

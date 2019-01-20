@@ -24,8 +24,10 @@ public class BroadcastCommand extends Command {
 		if(user == null)
 			return;
 
-		if(args.length == 0)
+		if(args.length == 0){
+			user.warn("メッセージを入力して下さい。");
 			return;
+		}
 
 		user.getDestination().broadcast(Arguments.newInstance(args).concatenateArguments(0, args.length - 1));
 	}

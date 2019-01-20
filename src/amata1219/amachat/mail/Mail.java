@@ -21,13 +21,13 @@ public class Mail extends AbstractMail {
 	}
 
 	public static void load(Configuration section){
-		section.getKeys().forEach(key -> {
+		for(String key : section.getKeys()){
 			Mail mail = new Mail(Long.valueOf(key).longValue());
 			mail.sender = UUID.fromString(section.getString(key + ".Sender"));
 			mail.receiver = UUID.fromString(section.getString(key + ".Receiver"));
 			mail.text = section.getString(key + ".Text");
 			MailManager.addMail(mail);
-		});
+		}
 	}
 
 	@Override
