@@ -57,6 +57,10 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 			return new Arguments(args);
 		}
 
+		public int getLastIndex(){
+			return args.length - 1;
+		}
+
 		public boolean hasArgument(int index){
 			return index < args.length;
 		}
@@ -84,13 +88,13 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 		}
 
 		public Result<Long> getNumberResult(int index){
-			Long result;
-			try{
-				result = Long.valueOf(getArgument(index));
-			}catch(NumberFormatException e){
-				return new Result<Long>(Long.valueOf(-1), true);
+			String argument = getArgument(index);
+			for(int i = 0; i < argument.length(); i++){
+				if(!Character.isDigit(argument.charAt(i))){
+					return new Result<Long>(Long.valueOf(-1), true);
+				}
 			}
-			return new Result<Long>(result);
+			return new Result<Long>(Long.valueOf(argument));
 		}
 
 		public Chat getChat(int index){

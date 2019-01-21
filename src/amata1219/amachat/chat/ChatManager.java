@@ -21,15 +21,24 @@ public class ChatManager {
 
 	private static final Map<Long, Chat> CHAT_MAP = new HashMap<>();
 	//Chat#getId(), Chat
+	private static final Method exists;
+	private static final Method mkdir;
 	private static final Method listFiles;
 	static{
 		Method arg0 = null;
+		Method arg1 = null;
+		Method arg2 = null;
 		try{
-			arg0 = File.class.getMethod("listFiles");
+			Class<?> File = File.class;
+			arg0 = File.getMethod("exists");
+			arg1 = File.getMethod("mkdir");
+			arg2 = File.getMethod("listFiles");
 		}catch (NoSuchMethodException | SecurityException e){
 			e.printStackTrace();
 		}
-		listFiles = arg0;
+		exists = arg0;
+		mkdir = arg1;
+		listFiles = arg2;
 	}
 
 	private static Set<Long> forceJoinChatSet = new HashSet<>();
@@ -43,7 +52,9 @@ public class ChatManager {
 			load = clazz.getMethod("load", long.class);
 			DIRECTORY = clazz.getField("DIRECTORY");
 			DIRECTORY.setAccessible(true);
-		}catch (NoSuchMethodException | SecurityException | NoSuchFieldException e){
+			if(!((boolean) exists.invoke(DIRECTORY)))
+				mkdir.invoke(DIRECTORY);
+		}catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
 			e.printStackTrace();
 		}
 

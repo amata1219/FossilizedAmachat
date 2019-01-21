@@ -2,7 +2,6 @@ package amata1219.amachat.chat;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -33,7 +32,7 @@ public abstract class Chat implements SupportTextProcessing {
 	protected String joinMessage, leaveMessage;
 	protected String format;
 	protected Map<MessageFormatType, String> messageFormats = new HashMap<>();
-	protected Set<Processor> processors = new HashSet<>();
+	protected Set<Processor> processors;
 	protected Set<UUID> users, mutedUsers, bannedUsers;
 	protected Map<UUID, Long> expires = new HashMap<>();
 

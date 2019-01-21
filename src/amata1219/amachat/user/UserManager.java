@@ -71,8 +71,16 @@ public class UserManager implements Listener {
 		Amachat.chat((ProxiedPlayer) e.getSender(), e.getMessage());
 	}
 
+	public static boolean isOnline(String playerName){
+		return Amachat.getPlugin().getProxy().getPlayer(playerName) != null;
+	}
+
 	public static User getUser(UUID uuid){
 		return USERS.get(uuid);
+	}
+
+	public static User getUser(String playerName){
+		return getUser(getUniqueId(playerName));
 	}
 
 	public static Set<User> getUsers(){

@@ -6,6 +6,10 @@ public final class Coloring implements Processor {
 
 	public static final String NAME = "Coloring";
 
+	public static void load(){
+		ProcessorManager.registerProcessor(new Coloring());
+	}
+
 	@Override
 	public String getName() {
 		return Coloring.NAME;

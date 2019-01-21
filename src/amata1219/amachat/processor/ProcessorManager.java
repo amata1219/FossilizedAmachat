@@ -136,6 +136,37 @@ public class ProcessorManager {
 		return Util.toTextComponent(text.get());
 	}
 
+	public static TextComponent processAll(SupportTextProcessing supporter, String senderName, String receiverName, String original){
+		AtomicReference<String> text = new AtomicReference<>(original);
+
+		Filter filter = DEFAULT_FILTERS.get(Coloring.NAME);
+		if(filter.should(supporter, text.get()))
+			text.set(filter.filter(supporter, text.get()));
+
+		for(Filter foreFilter : FORE_FILTERS.values()){
+			if(foreFilter.should(supporter, text.get()))
+				text.set(foreFilter.filter(supporter, text.get()));
+		}
+
+		for(Processor processor : supporter.getProcessors()){
+			if(!DEFAULT_FILTERS.containsKey(processor.getName()) && !FORE_FILTERS.containsKey(processor.getName()) && AFT_FILTERS.containsKey(processor.getName()))
+				text.set(processor.process(text.get()));
+		}
+
+		for(Filter aftFilter : AFT_FILTERS.values()){
+			if(aftFilter.should(supporter, text.get()))
+				text.set(aftFilter.filter(supporter, text.get()));
+		}
+
+		filter = DEFAULT_FILTERS.get(GoogleIME.NAME);
+		if(((GoogleIMEFilter) (filter = DEFAULT_FILTERS.get(GoogleIME.NAME))).should(supporter, text.get()))
+			text.set(((GoogleIMEFilter) filter).filter(supporter, text.get()));
+		else if((filter = DEFAULT_FILTERS.get(GoogleTranslate.NAME)).should(supporter, text.get()))
+			text.set(filter.filter(supporter, text.get()));
+
+		return applyFormat(supporter, senderName, receiverName, text.get());
+	}
+
 	public static TextComponent applyFormat(SupportTextProcessing supporter, String playerName, String text){
 		String[] a = supporter.getFormat().replace("[message]", text).split(PlaceHolders.CHAT);
 		if(a.length == 0)
@@ -188,6 +219,55 @@ public class ProcessorManager {
 		return base;
 	}
 
+	public static TextComponent applyFormat(SupportTextProcessing supporter, String senderName, String receiverName, String text){
+		String[] a = supporter.getFormat().replace("[message]", text).split(PlaceHolders.CHAT);
+		if(a.length == 0)
+			return Util.emptyTextComponent();
+
+		TextComponent base = Util.emptyTextComponent();
+		if(a.length == 1){
+			String[] b = a[0].split(PlaceHolders.PLAYER);
+			if(b.length == 0)
+				return Util.emptyTextComponent();
+
+			if(b.length == 1){
+				base.addExtra(b[0]);
+			}else{
+				for(int i = 0; i < b.length - 1; i++){
+					base.addExtra(b[i]);
+					TextComponent add = Util.toTextComponent(senderName);
+					add.setClickEvent(new ClickEvent(Action.SUGGEST_COMMAND, "/message " + senderName));
+					base.addExtra(add);
+				}
+				base.addExtra(b[b.length - 1]);
+			}
+		}else{
+			for(int i = 0; i < a.length - 1; i++){
+				String[] b = a[0].split(PlaceHolders.PLAYER);
+				if(b.length == 0)
+					return Util.emptyTextComponent();
+
+				if(b.length == 1){
+					base.addExtra(b[0]);
+				}else{
+					for(int j = 0; j < b.length - 1; j++){
+						base.addExtra(b[i]);
+						TextComponent add = Util.toTextComponent(senderName);
+						add.setClickEvent(new ClickEvent(Action.SUGGEST_COMMAND, "/message " + senderName));
+						base.addExtra(add);
+					}
+					base.addExtra(b[b.length - 1]);
+				}
+
+				TextComponent add = Util.toTextComponent(receiverName);
+				add.setClickEvent(new ClickEvent(Action.RUN_COMMAND, "/message " + receiverName));
+				base.addExtra(add);
+			}
+			base.addExtra(a[a.length - 1]);
+		}
+		return base;
+	}
+
 	public static Set<Processor> fromProcessorNames(Collection<String> processorNames){
 		Set<Processor> processors = new HashSet<>();
 		for(String processorName : processorNames){
@@ -211,6 +291,8 @@ public class ProcessorManager {
 
 		public static final String CHAT = "[chat]";
 		public static final String PLAYER = "[player]";
+		public static final String SENDER = "[sender]";
+		public static final String RECEIVER = "[receiver]";
 		public static final String MESSAGE = "[message]";
 		public static final String ORIGINAL = "[original]";
 		public static final String CONVERTED = "[converted]";

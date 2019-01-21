@@ -24,11 +24,12 @@ public class BroadcastCommand extends Command {
 		if(user == null)
 			return;
 
-		if(args.length == 0){
+		Arguments arguments = Arguments.newInstance(args);
+		if(!arguments.hasArgument(0)){
 			user.warn("メッセージを入力して下さい。");
 			return;
 		}
 
-		user.getDestination().broadcast(Arguments.newInstance(args).concatenateArguments(0, args.length - 1));
+		user.getDestination().broadcast(arguments.concatenateArguments(0, arguments.getLastIndex()));
 	}
 }

@@ -19,6 +19,13 @@ GoogleTranslate:
     - 'ZH'
 ChannelChat:
   Enable: true
+Privatechat:
+  Enable: true
+  Format: '[&a[chat]]&r[player]&a>&r [message]'
+  MessageFormats:
+    Normal: '[converted]'
+    Japanize: '[converted]&7([original])'
+    Translate: '[converted]&7([original])'
 Mail:
   Enable: true
   ExpirationDays: 30

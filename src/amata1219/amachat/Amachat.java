@@ -11,14 +11,21 @@ import amata1219.amachat.bot.ChatBot;
 import amata1219.amachat.chat.ChannelChat;
 import amata1219.amachat.chat.ChatManager;
 import amata1219.amachat.chat.PermissionChannelChat;
+import amata1219.amachat.chat.PrivateChat;
 import amata1219.amachat.chat.VanillaChat;
 import amata1219.amachat.command.AmachatCommand;
 import amata1219.amachat.command.BroadcastCommand;
+import amata1219.amachat.command.ChatCommand;
 import amata1219.amachat.command.Command;
 import amata1219.amachat.command.MessageCommand;
 import amata1219.amachat.config.Config;
 import amata1219.amachat.mail.Mail;
 import amata1219.amachat.mail.MailManager;
+import amata1219.amachat.processor.Coloring;
+import amata1219.amachat.processor.GoogleIME;
+import amata1219.amachat.processor.GoogleTranslate;
+import amata1219.amachat.processor.NGWordMask;
+import amata1219.amachat.processor.PlaceHolder;
 import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
 import net.md_5.bungee.BungeeCord;
@@ -47,14 +54,19 @@ public class Amachat extends Plugin implements Listener {
 		if(!DIRECTORY.exists())
 			DIRECTORY.mkdirs();
 
-		commands.put("amachat", new AmachatCommand("amachat", "amachat.command.amachat", "achat", "amc", "chat", "ch"));
+		commands.put("amachat", new AmachatCommand("amachat", "amachat.command.amachat", "amacha"));
+		commands.put("chat", new ChatCommand("chat", "amachat.command.chat", "c"));
 		commands.put("broadcast", new BroadcastCommand("broadcast", "amachat.command.broadcast", "bcast", "bc"));
 		commands.put("message", new MessageCommand("message", "amachat.command.message", "msg"));
 		commands.values().stream().forEach(Amachat::registerCommand);
 
 		config = Config.load(new File(getDataFolder() + File.separator + "config.yml"), "config.yml");
 
-
+		Coloring.load();
+		GoogleIME.load();
+		GoogleTranslate.load();
+		PlaceHolder.load();
+		NGWordMask.load();
 		VanillaChat.load();
 		ChatManager.load(ChannelChat.class);
 		ChatManager.load(PermissionChannelChat.class);
@@ -62,16 +74,9 @@ public class Amachat extends Plugin implements Listener {
 		BotManager.load(AutoMessageBot.class);
 		BotManager.load(ActionBot.class);
 		UserManager.load();
+		PrivateChat.load();
 		MailManager.load();
-		Mail.load(MailManager.getDatabase().getConfiguration());
-
-		/*
-		 * ProcessorManager
-		 * ChatManager
-		 * BotManager
-		 * UserManager
-		 * MailManager
-		 */
+		Mail.load();
 
 		getProxy().getPluginManager().registerListener(this, this);
 	}

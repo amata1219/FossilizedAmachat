@@ -1,6 +1,5 @@
 package amata1219.amachat.mail;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,11 +21,10 @@ public class MailManager implements SupportTextProcessing {
 
 	private static MailManager instance;
 
-	private static Config config;
-	private static String format;
-	private static final Map<MessageFormatType, String> MESSAGE_FORMATS = new HashMap<>();
-	private static final Set<Processor> PROCESSORS = new HashSet<>();
-	private static final Set<AbstractMail> MAILS = new HashSet<>();
+	private String format;
+	private final Map<MessageFormatType, String> messageFormats = new HashMap<>();
+	private final Set<Processor> processors = new HashSet<>();
+	private final Set<AbstractMail> mails = new HashSet<>();
 
 	private MailManager(){
 
@@ -36,23 +34,24 @@ public class MailManager implements SupportTextProcessing {
 		if(!Amachat.getConfig().getConfiguration().getBoolean("Mail.Enable"))
 			return;
 
-		config = Config.load(new File(Amachat.getPlugin().getDataFolder(), "mails.yml"), "mails.yml");
+		MailManager manager = new MailManager();
 
 		Configuration configuration = Amachat.getConfig().getConfiguration().getSection("Mail");
-		PROCESSORS.addAll(ProcessorManager.fromProcessorNames(configuration.getStringList("Processors")));
-		MESSAGE_FORMATS.put(MessageFormatType.NORMAL, Coloring.coloring(configuration.getString("Format.Normal")));
-		MESSAGE_FORMATS.put(MessageFormatType.JAPANIZE, Coloring.coloring(configuration.getString("Format.Japanized")));
-		MESSAGE_FORMATS.put(MessageFormatType.TRANSLATE, Coloring.coloring(configuration.getString("Format.Translation")));
+		Map<MessageFormatType, String> messageFormats = manager.messageFormats;
+		messageFormats.put(MessageFormatType.NORMAL, Coloring.coloring(configuration.getString("Format.Normal")));
+		messageFormats.put(MessageFormatType.JAPANIZE, Coloring.coloring(configuration.getString("Format.Japanized")));
+		messageFormats.put(MessageFormatType.TRANSLATE, Coloring.coloring(configuration.getString("Format.Translation")));
+		manager.processors.addAll(ProcessorManager.fromProcessorNames(configuration.getStringList("Processors")));
 
-		instance = new MailManager();
+		instance = manager;
+	}
+
+	public static MailManager getInstance(){
+		return instance;
 	}
 
 	public static boolean isEnable(){
 		return Amachat.getConfig().getConfiguration().getBoolean("Mail.Enable");
-	}
-
-	public static Config getDatabase(){
-		return config;
 	}
 
 	public static long getExpirationDays(){
@@ -68,12 +67,12 @@ public class MailManager implements SupportTextProcessing {
 	}
 
 	public static Set<AbstractMail> getMails(){
-		return MAILS;
+		return instance.mails;
 	}
 
 	public static Set<AbstractMail> getMails(UUID receiver){
 		Set<AbstractMail> mails = new HashSet<>();
-		for(AbstractMail mail : MAILS){
+		for(AbstractMail mail : getMails()){
 			if(mail.getReceiver().equals(receiver))
 				mails.add(mail);
 		}
@@ -82,7 +81,7 @@ public class MailManager implements SupportTextProcessing {
 
 	public static Set<AbstractMail> getMails(Class<?> clazz){
 		Set<AbstractMail> mails = new HashSet<>();
-		for(AbstractMail mail : MAILS){
+		for(AbstractMail mail : getMails()){
 			if(clazz.isInstance(mail))
 				mails.add(mail);
 		}
@@ -91,7 +90,7 @@ public class MailManager implements SupportTextProcessing {
 
 	public static Set<AbstractMail> getMails(UUID receiver, Class<?> clazz){
 		Set<AbstractMail> mails = new HashSet<>();
-		for(AbstractMail mail : MAILS){
+		for(AbstractMail mail : getMails()){
 			if(mail.getReceiver().equals(receiver) && clazz.isInstance(mail))
 				mails.add(mail);
 		}
@@ -104,12 +103,12 @@ public class MailManager implements SupportTextProcessing {
 	}
 
 	public static void addMail(Mail mail){
-		MAILS.add(mail);
+		getMails().add(mail);
 		mail.save(true);
 	}
 
 	public void removeMail(Mail mail){
-		MAILS.remove(mail);
+		mails.remove(mail);
 		mail.remove(true);
 	}
 
@@ -117,7 +116,7 @@ public class MailManager implements SupportTextProcessing {
 		Config config = Amachat.getConfig();
 
 		for(AbstractMail mail : getMails(receiver)){
-			MAILS.remove(mail);
+			mails.remove(mail);
 			mail.remove(false);
 		}
 
@@ -131,42 +130,42 @@ public class MailManager implements SupportTextProcessing {
 
 	@Override
 	public void setFormat(String format){
-		MailManager.format = format;
+		this.format = format;
 	}
 
 	@Override
 	public Map<MessageFormatType, String> getMessageFormats(){
-		return MESSAGE_FORMATS;
+		return messageFormats;
 	}
 
 	@Override
 	public String getMessageFormat(MessageFormatType type){
-		return MESSAGE_FORMATS.get(type);
+		return messageFormats.get(type);
 	}
 
 	@Override
 	public void setMessageFormat(MessageFormatType type, String format){
-		MESSAGE_FORMATS.put(type, format);
+		messageFormats.put(type, format);
 	}
 	@Override
 
 	public Set<Processor> getProcessors(){
-		return PROCESSORS;
+		return processors;
 	}
 
 	@Override
 	public boolean hasProcessor(String processorName){
-		return PROCESSORS.contains(ProcessorManager.getProcessor(processorName));
+		return processors.contains(ProcessorManager.getProcessor(processorName));
 	}
 
 	@Override
 	public void addProcessor(Processor processor){
-		PROCESSORS.add(processor);
+		processors.add(processor);
 	}
 
 	@Override
 	public void removeProcessor(String processorName){
-		PROCESSORS.remove(ProcessorManager.getProcessor(processorName));
+		processors.remove(ProcessorManager.getProcessor(processorName));
 	}
 
 }

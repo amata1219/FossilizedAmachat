@@ -1,0 +1,5 @@
+name: Amachat
+main: amata1219.amachat.spigot.Amachat4Spigot
+softdepend: [DiscordSRV, Dynmap]
+version: 1.0
+author: amata1219(Twitter@amata1219)
