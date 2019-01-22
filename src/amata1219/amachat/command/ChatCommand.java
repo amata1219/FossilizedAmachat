@@ -32,7 +32,10 @@ public class ChatCommand extends Command {
 	 */
 
 	public static void main(String[] args){
-		hash("");
+		hash("PlayerDeath");
+		hash("PlayerAdvancementDone");
+		hash("Dynmap");
+		hash("DiscordSRV");
 		System.out.close();
 	}
 

@@ -1,38 +1,33 @@
 package amata1219.amachat.spigot;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.dynmap.DynmapAPI;
-import org.dynmap.DynmapWebChatEvent;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 
-public class DynmapBridge implements Listener, PluginMessageListener {
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.api.Subscribe;
+import github.scarsz.discordsrv.api.events.DiscordGuildMessageReceivedEvent;
+import github.scarsz.discordsrv.util.DiscordUtil;
 
-	private static DynmapBridge bridge;
-	private DynmapAPI api;
+public class DiscordSRVBridge implements PluginMessageListener {
 
-	private DynmapBridge(){
-
-	}
+	private static DiscordSRVBridge bridge;
 
 	public static void load(Plugin plugin){
-		if(!(plugin instanceof DynmapAPI))
+		if(!(plugin instanceof DiscordSRV))
 			return;
 
-		bridge = new DynmapBridge();
-		bridge.api = (DynmapAPI) plugin;
-
+		bridge = new DiscordSRVBridge();
+		DiscordSRV.api.subscribe(bridge);
 		Amachat4Spigot amachat = Amachat4Spigot.getPlugin();
-		amachat.getServer().getPluginManager().registerEvents(bridge, amachat);
 		amachat.getServer().getMessenger().registerIncomingPluginChannel(amachat, "BungeeCord", bridge);
 	}
 
 	public static void unload(){
+		DiscordSRV.api.unsubscribe(bridge);
 		Amachat4Spigot amachat = Amachat4Spigot.getPlugin();
 		amachat.getServer().getMessenger().unregisterIncomingPluginChannel(amachat, "BungeeCord", bridge);
 	}
@@ -46,16 +41,15 @@ public class DynmapBridge implements Listener, PluginMessageListener {
 		if(!in.readUTF().equals("Amachat"))
 			return;
 
-		if(!in.readUTF().equals("DiscordSRV"))
+		if(!in.readUTF().equals("Dynmap"))
 			return;
 
-		api.sendBroadcastToWeb(in.readUTF(), in.readUTF());
+		DiscordUtil.queueMessage(DiscordSRV.getPlugin().getMainTextChannel(), in.readUTF());
 	}
 
-	@EventHandler
-	public void onChat(DynmapWebChatEvent e){
-		if(!e.isCancelled())
-			Amachat4Spigot.sendPluginMessage("Amachat", "Dynmap", e.getName(), e.getMessage());
+	@Subscribe
+	public void onReceived(DiscordGuildMessageReceivedEvent e){
+		Amachat4Spigot.sendPluginMessage("Amachat", "DiscordSRV", e.getAuthor().getName(), e.getMessage().toString());
 	}
 
 }

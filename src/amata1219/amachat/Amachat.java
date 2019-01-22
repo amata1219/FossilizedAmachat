@@ -4,6 +4,9 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
+import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteStreams;
+
 import amata1219.amachat.bot.ActionBot;
 import amata1219.amachat.bot.AutoMessageBot;
 import amata1219.amachat.bot.BotManager;
@@ -33,6 +36,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.Connection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.TabCompleteEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -91,6 +95,46 @@ public class Amachat extends Plugin implements Listener {
 
 	public static Config getConfig(){
 		return plugin.config;
+	}
+
+	@EventHandler
+	public void onReceived(PluginMessageEvent e){
+		String tag = e.getTag();
+		if(!tag.equals("BungeeCord") && !tag.equals("bungeecord:main"))
+			return;
+
+		ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
+		if(!in.readUTF().equals("Amachat"))
+			return;
+
+		String channel = in.readUTF();
+
+		/*
+			PlayerDeath - -2095361037
+
+			PlayerAdvancementDone - 2016805697
+
+			Dynmap - 2061913187
+
+			DiscordSRV - -1767718581
+		 */
+
+		switch(channel.hashCode()){
+		case -2095361037:
+
+			break;
+		case 2016805697:
+
+			break;
+		case 2061913187:
+
+			break;
+		case -1767718581:
+
+			break;
+		default:
+			return;
+		}
 	}
 
 	@EventHandler
