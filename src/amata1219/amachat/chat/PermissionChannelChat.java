@@ -3,7 +3,6 @@ package amata1219.amachat.chat;
 import java.io.File;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import amata1219.amachat.Amachat;
 import amata1219.amachat.bot.event.ChatEvent4Bot;
@@ -15,6 +14,7 @@ import amata1219.amachat.prefix.PrefixManager;
 import amata1219.amachat.processor.ProcessorManager;
 import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.config.Configuration;
 
 public class PermissionChannelChat extends ChannelChat implements Permission {
@@ -109,7 +109,9 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 			return;
 		}
 
-		ChatManager.sendMessage(users.stream().filter(id -> hasPermissions(UserManager.getUser(id))).collect(Collectors.toSet()), ProcessorManager.processAll(this, user, message), true);
+		TextComponent component = ProcessorManager.processAll(this, user, message);
+		users.parallelStream().map(UserManager::getUser).forEach(optional -> optional.ifPresent(uzer -> uzer.sendMessage(component)));
+		Amachat.info(component.getText());
 	}
 
 	@Override

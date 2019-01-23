@@ -103,7 +103,7 @@ public class AutoMessageBot extends TaskBot {
 		if(pause || messages.isEmpty())
 			return;
 
-		ChatManager.getChatSet(chatIds).forEach(chat -> chat.broadcast(messages.get(messages.size() > count ? count++ : (count = 0))));
+		ChatManager.getChats(chatIds).forEach(chat -> chat.broadcast(messages.get(messages.size() > count ? count++ : (count = 0))));
 	}
 
 }

@@ -74,7 +74,7 @@ public class Util {
 	}
 
 	public static User toUser(CommandSender sender){
-		return UserManager.getUser(((ProxiedPlayer) sender).getUniqueId());
+		return UserManager.getUser(((ProxiedPlayer) sender).getUniqueId()).orElse(null);
 	}
 
 	public static class TextBuilder {

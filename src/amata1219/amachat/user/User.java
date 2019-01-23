@@ -94,10 +94,8 @@ public final class User {
 	}
 
 	public void sendMessage(TextComponent component){
-		if(component == null)
-			return;
-
-		toProxiedPlayer().sendMessage(component);
+		if(component != null)
+			toProxiedPlayer().sendMessage(component);
 	}
 
 	public void sendMessage(String message){
@@ -145,8 +143,7 @@ public final class User {
 	}
 
 	public Chat getDestination(){
-		Chat chat = ChatManager.getChat(destination);
-		return chat == null ? ChatManager.getChat(VanillaChat.ID) : chat;
+		return ChatManager.getChat(destination).orElse(ChatManager.getChat(VanillaChat.ID).get());
 	}
 
 	public long getDestinationId(){
@@ -178,9 +175,7 @@ public final class User {
 	}
 
 	public void addMutedChat(long id){
-		Chat chat = ChatManager.getChat(id);
-		if(chat != null)
-			addMutedChat(chat);
+		ChatManager.getChat(id).ifPresent(this::addMutedChat);
 	}
 
 	public void removeMutedChat(Chat chat){

@@ -12,7 +12,7 @@ public abstract class AbstractMail {
 
 	public abstract void remove(boolean apply);
 
-	public abstract boolean trySend();
+	public abstract void trySend();
 
 	public long getTimestamp(){
 		return timestamp;

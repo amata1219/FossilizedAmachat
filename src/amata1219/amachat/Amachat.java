@@ -29,7 +29,6 @@ import amata1219.amachat.processor.GoogleIME;
 import amata1219.amachat.processor.GoogleTranslate;
 import amata1219.amachat.processor.NGWordMask;
 import amata1219.amachat.processor.PlaceHolder;
-import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.api.ChatColor;
@@ -71,12 +70,15 @@ public class Amachat extends Plugin implements Listener {
 		GoogleTranslate.load();
 		PlaceHolder.load();
 		NGWordMask.load();
+
 		VanillaChat.load();
 		ChatManager.load(ChannelChat.class);
 		ChatManager.load(PermissionChannelChat.class);
+
 		BotManager.load(ChatBot.class);
 		BotManager.load(AutoMessageBot.class);
 		BotManager.load(ActionBot.class);
+
 		UserManager.load();
 		PrivateChat.load();
 		MailManager.load();
@@ -167,11 +169,7 @@ public class Amachat extends Plugin implements Listener {
 		if(sender == null || message == null)
 			return;
 
-		final User user = UserManager.getUser(sender.getUniqueId());
-		if(user == null && !UserManager.fix(sender))
-			return;
-
-		Amachat.getPlugin().getExecutorService().execute(() -> user.getDestination().chat(user, message));
+		UserManager.getUser(sender.getUniqueId()).ifPresent(user -> Amachat.getPlugin().getExecutorService().execute(() -> user.getDestination().chat(user, message)));
 	}
 
 	public static void info(String message){

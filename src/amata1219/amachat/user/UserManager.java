@@ -4,8 +4,10 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -37,11 +39,13 @@ public class UserManager implements Listener {
 		plugin.getProxy().getPluginManager().registerListener(plugin, manager);
 
 		Configuration configuration = (config = Config.load(new File(Amachat.getPlugin().getDataFolder(), "players.yml"), "players.yml")).getConfiguration();
-		configuration.getKeys().forEach(uuid -> CACHE.put(UUID.fromString(uuid), configuration.getString(uuid)));
+		configuration.getKeys().parallelStream()
+		.forEach(uuid -> CACHE.put(UUID.fromString(uuid), configuration.getString(uuid)));
 	}
 
 	public static void unload(){
-		CACHE.forEach((k, v) -> config.getConfiguration().set(k.toString(), v));
+		CACHE.entrySet().parallelStream()
+		.forEach(entry -> config.getConfiguration().set(entry.getKey().toString(), entry.getValue()));
 		config.apply();
 	}
 
@@ -75,11 +79,11 @@ public class UserManager implements Listener {
 		return Amachat.getPlugin().getProxy().getPlayer(playerName) != null;
 	}
 
-	public static User getUser(UUID uuid){
-		return USERS.get(uuid);
+	public static Optional<User> getUser(UUID uuid){
+		return Optional.ofNullable(USERS.get(uuid));
 	}
 
-	public static User getUser(String playerName){
+	public static Optional<User> getUser(String playerName){
 		return getUser(getUniqueId(playerName));
 	}
 
@@ -87,25 +91,13 @@ public class UserManager implements Listener {
 		return new HashSet<>(USERS.values());
 	}
 
-	public static Set<User> getUsersByUniqueIdSet(Set<UUID> uuids){
-		Set<User> users = new HashSet<>();
-		for(UUID uuid : uuids){
-			if(USERS.containsKey(uuid))
-				users.add(getUser(uuid));
-		}
-		return users;
-	}
-
-	public static boolean fix(ProxiedPlayer player){
-		if(player == null || !player.isConnected())
-			return false;
-
-		UUID uuid = player.getUniqueId();
-		if(!USERS.containsKey(uuid))
-			return false;
-
-		USERS.put(uuid, User.load(uuid));
-		return true;
+	public static Set<User> getUsers(Set<UUID> uuids){
+		return uuids.parallelStream()
+				.filter(USERS::containsKey)
+				.map(UserManager::getUser)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toSet());
 	}
 
 	public static boolean isExist(String playerName){

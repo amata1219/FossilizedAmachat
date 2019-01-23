@@ -4,23 +4,26 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import amata1219.amachat.Amachat;
 import amata1219.amachat.Util;
-import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
 import net.md_5.bungee.api.chat.TextComponent;
 
 public class ChatManager {
 
-	private static final Map<Long, Chat> CHAT_MAP = new HashMap<>();
-	//Chat#getId(), Chat
+	private static final Map<Long, Chat> CHAT_CHATS = new HashMap<>();
+	private static final Set<Long> FORCE_JOIN_CHATS = new HashSet<>();
+
 	private static final Method exists;
 	private static final Method mkdir;
 	private static final Method listFiles;
@@ -41,74 +44,90 @@ public class ChatManager {
 		listFiles = arg2;
 	}
 
-	private static Set<Long> forceJoinChatSet = new HashSet<>();
-
 	public static void load(Class<?> clazz){
 		clazz.asSubclass(Chat.class);
 
-		Method load = null;
-		Field DIRECTORY = null;
+		Method arg0 = null;
+		File[] arg2 = null;
 		try {
-			load = clazz.getMethod("load", long.class);
-			DIRECTORY = clazz.getField("DIRECTORY");
-			DIRECTORY.setAccessible(true);
-			if(!((boolean) exists.invoke(DIRECTORY)))
-				mkdir.invoke(DIRECTORY);
+			arg0 = clazz.getMethod("load", long.class);
+
+			Field arg1 = clazz.getField("DIRECTORY");
+			arg1.setAccessible(true);
+			if(!((boolean) exists.invoke(arg1)))
+				mkdir.invoke(arg1);
+
+			arg2 = (File[]) listFiles.invoke(arg1);
 		}catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
 			e.printStackTrace();
 		}
 
-		try{
-			for(File file : (File[]) listFiles.invoke(DIRECTORY)){
-				String fileName = file.getName();
-				if(!Util.isYamlConfiguration(fileName))
-					continue;
+		final Method load = arg0;
+		final File[] files = arg2;
 
-				long id = Util.getId(fileName);
-				registerChat(id, (Chat) load.invoke(null, id));
-			}
-		}catch(IllegalAccessException | IllegalArgumentException | InvocationTargetException e){
-			e.printStackTrace();
+		Arrays.stream(files).parallel()
+		.map(File::getName)
+		.filter(Util::isYamlConfiguration)
+		.mapToLong(Util::getId)
+		.mapToObj(id -> loadChat(load, id))
+		.forEach(optional -> optional.ifPresent(chat -> registerChat(chat.getId(), chat)));
+	}
+
+	private static Optional<Chat> loadChat(Method load, long id){
+		Chat chat = null;
+		try {
+			chat = (Chat) load.invoke(null, id);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			return Optional.empty();
 		}
-	}
-
-	public static boolean isUsedId(long id){
-		return CHAT_MAP.containsKey(id);
-	}
-
-	public static Chat getChat(long id){
-		return CHAT_MAP.get(id);
-	}
-
-	public static Chat getChat(String aliases){
-		for(Chat chat : CHAT_MAP.values()){
-			if(aliases.equals(chat.getAliases()))
-				return chat;
-		}
-
-		return null;
-	}
-
-	public static Collection<Chat> getChatCollection(){
-		return CHAT_MAP.values();
-	}
-
-	public static Set<Chat> getChatSet(Set<Long> chatIds){
-		Set<Chat> chats = new HashSet<>();
-		CHAT_MAP.keySet().stream().filter(key -> chatIds.contains(key)).forEach(key -> chats.add(CHAT_MAP.get(key)));
-		return chats;
+		return Optional.ofNullable(chat);
 	}
 
 	public static void registerChat(long id, Chat chat){
-		CHAT_MAP.put(id, chat);
+		CHAT_CHATS.put(id, chat);
 	}
 
 	public static void unregisterChat(long id){
-		CHAT_MAP.remove(id);
+		CHAT_CHATS.remove(id);
+	}
+
+	public static boolean isExist(long id){
+		return CHAT_CHATS.containsKey(id);
+	}
+
+	public static boolean isExist(Chat chat){
+		return isExist(chat.getId());
+	}
+
+	public static Optional<Chat> getChat(long id){
+		return Optional.ofNullable(CHAT_CHATS.get(id));
+	}
+
+	public static Optional<Chat> matchedChat(String aliases){
+		return CHAT_CHATS.values().parallelStream()
+				.filter(chat -> aliases.equals(chat.getAliases()))
+				.findFirst();
+	}
+
+	public static Collection<Chat> getChats(){
+		return CHAT_CHATS.values();
+	}
+
+	public static Set<Chat> getChats(Collection<Long> ids){
+		return ids.parallelStream()
+				.filter(ChatManager::isExist)
+				.map(ChatManager::getChat)
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.collect(Collectors.toSet());
 	}
 
 	public static boolean isForceJoinChat(long id){
-		return forceJoinChatSet.contains(id);
+		return FORCE_JOIN_CHATS.contains(id);
+	}
+
+	public static boolean isForceJoinChat(Chat chat){
+		return isForceJoinChat(chat);
 	}
 
 	public static void sendMessage(UUID uuid, String message, boolean logging){
@@ -116,50 +135,33 @@ public class ChatManager {
 	}
 
 	public static void sendMessage(UUID uuid, TextComponent message, boolean logging){
-		User player = UserManager.getUser(uuid);
-		if(player == null)
-			return;
-
-		player.sendMessage(message);
+		UserManager.getUser(uuid).ifPresent(user -> user.sendMessage(message));
 
 		if(logging)
 			Amachat.info(message.getText());
 	}
 
 	public static void sendMessage(Set<UUID> uuids, String message, boolean logging){
-		TextComponent component = Util.toTextComponent(message);
-		for(User user : UserManager.getUsersByUniqueIdSet(uuids))
-			user.sendMessage(component);
-
-		if(logging)
-			Amachat.info(message);
+		sendMessage(uuids, Util.toTextComponent(message), logging);
 	}
 
 	public static void sendMessage(Set<UUID> uuids, TextComponent message, boolean logging){
-		for(User user : UserManager.getUsersByUniqueIdSet(uuids))
-			user.sendMessage(message);
+		UserManager.getUsers(uuids).parallelStream()
+		.forEach(user -> user.sendMessage(message));
 
 		if(logging)
 			Amachat.info(message.getText());
 	}
 
 	public static Set<Chat> fromChatIds(Collection<Long> ids){
-		Set<Chat> chat = new HashSet<>();
-		for(long id : ids){
-			Chat c = getChat(id);
-			if(c != null)
-				chat.add(c);
-		}
-		return chat;
+		return getChats(ids);
 	}
 
-	public static Set<Long> toChatIds(Collection<Chat> chat){
-		Set<Long> ids = new HashSet<>();
-		for(Chat c : chat){
-			if(isUsedId(c.getId()))
-				ids.add(c.getId());
-		}
-		return ids;
+	public static Set<Long> toChatIds(Collection<Chat> chats){
+		return chats.parallelStream()
+				.filter(ChatManager::isExist)
+				.map(chat -> Long.valueOf(chat.getId()))
+				.collect(Collectors.toSet());
 	}
 
 }

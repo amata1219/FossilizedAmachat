@@ -149,7 +149,7 @@ public class ChatCommand extends Command {
 			.append(ChatColor.BLUE)
 			.append("チャット一覧");
 			boolean b = false;
-			for(Chat ch : ChatManager.getChatCollection()){
+			for(Chat ch : ChatManager.getChats()){
 				if(!ch.isHide()){
 					list.newLine()
 					.append(b ? ChatColor.RESET : ChatColor.GRAY)

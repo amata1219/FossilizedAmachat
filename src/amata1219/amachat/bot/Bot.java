@@ -15,6 +15,7 @@ public abstract class Bot {
 	protected long id;
 	protected Config config;
 	protected Set<Long> chatIds;
+	protected Set<Chat> chats;
 
 	public abstract String getName();
 
@@ -26,7 +27,7 @@ public abstract class Bot {
 		if(config == null)
 			return;
 
-		config.getConfiguration().set("ChatList", chatIds);
+		config.getConfiguration().set("ChatList", ChatManager.toChatIds(chats));
 
 		config.apply();
 	}
@@ -37,15 +38,15 @@ public abstract class Bot {
 
 		config.reload();
 
-		chatIds = config.getLongSet("ChatList");
+		chats = ChatManager.fromChatIds(config.getLongSet("ChatList"));
 	}
 
 	public Config getConfig(){
 		return config;
 	}
 
-	public Set<Chat> getJoinedChatSet(){
-		return ChatManager.getChatSet(chatIds);
+	public Set<Chat> getChats(){
+		return ChatManager.getChats(chatIds);
 	}
 
 	public boolean isJoined(long id){

@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import amata1219.amachat.Amachat;
 import amata1219.amachat.config.Config;
-import amata1219.amachat.user.User;
 import amata1219.amachat.user.UserManager;
 import net.md_5.bungee.config.Configuration;
 
@@ -64,13 +63,8 @@ public class Mail extends AbstractMail {
 	}
 
 	@Override
-	public boolean trySend() {
-		User user = UserManager.getUser(receiver);
-		if(user == null)
-			return false;
-
-		user.sendMessage(MailManager.process(this));
-		return true;
+	public void trySend() {
+		UserManager.getUser(receiver).ifPresent(user -> user.sendMessage(MailManager.process(this)));
 	}
 
 }
