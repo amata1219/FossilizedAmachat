@@ -4,6 +4,12 @@ import net.md_5.bungee.api.CommandSender;
 
 public class RoomCommand extends Command {
 
+	/*
+	 * room
+	 *   create
+	 *
+	 */
+
 	public RoomCommand(String name, String permission, String... aliases) {
 		super(name, permission, aliases);
 	}

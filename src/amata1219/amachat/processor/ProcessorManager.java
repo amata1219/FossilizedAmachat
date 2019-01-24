@@ -2,10 +2,11 @@ package amata1219.amachat.processor;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -40,8 +41,8 @@ public class ProcessorManager {
 		PROCESSORS.remove(processorName);
 	}
 
-	public static Processor getProcessor(String processorName){
-		return PROCESSORS.get(processorName);
+	public static Optional<Processor> getProcessor(String processorName){
+		return Optional.ofNullable(PROCESSORS.get(processorName));
 	}
 
 	public static void registerForeFilter(String filterName, Filter filter){
@@ -52,8 +53,8 @@ public class ProcessorManager {
 		FORE_FILTERS.remove(filterName);
 	}
 
-	public static Filter getForeFilter(String filterName){
-		return FORE_FILTERS.get(filterName);
+	public static Optional<Filter> getForeFilter(String filterName){
+		return Optional.ofNullable(FORE_FILTERS.get(filterName));
 	}
 
 	public static void registerAftFilter(String filterName, Filter filter){
@@ -64,8 +65,8 @@ public class ProcessorManager {
 		AFT_FILTERS.remove(filterName);
 	}
 
-	public static Filter getAftFilter(String filterName){
-		return AFT_FILTERS.get(filterName);
+	public static Optional<Filter> getAftFilter(String filterName){
+		return Optional.ofNullable(AFT_FILTERS.get(filterName));
 	}
 
 	public static TextComponent processAll(Chat chat, User user, String original){
@@ -75,32 +76,31 @@ public class ProcessorManager {
 	public static TextComponent processAll(SupportTextProcessing supporter, String playerName, String original){
 		AtomicReference<String> text = new AtomicReference<>(original);
 
-		Filter filter = DEFAULT_FILTERS.get(Coloring.NAME);
-		if(filter.should(supporter, text.get()))
-			text.set(filter.filter(supporter, text.get()));
+		Filter coloring = DEFAULT_FILTERS.get(Coloring.NAME);
+		if(coloring.should(supporter, text.get()))
+			text.set(coloring.filter(supporter, text.get()));
 
-		for(Filter foreFilter : FORE_FILTERS.values()){
-			if(foreFilter.should(supporter, text.get()))
-				text.set(foreFilter.filter(supporter, text.get()));
-		}
+		FORE_FILTERS.values().parallelStream()
+		.filter(fore -> fore.should(supporter, text.get()))
+		.forEach(fore -> fore.filter(supporter, text.get()));
 
-		for(Processor processor : supporter.getProcessors()){
-			if(!DEFAULT_FILTERS.containsKey(processor.getName()) && !FORE_FILTERS.containsKey(processor.getName()) && AFT_FILTERS.containsKey(processor.getName()))
-				text.set(processor.process(text.get()));
-		}
+		supporter.getProcessors().parallelStream()
+		.filter(processor -> !DEFAULT_FILTERS.containsKey(processor.getName()))
+		.filter(processor -> !FORE_FILTERS.containsKey(processor.getName()))
+		.filter(processor -> !AFT_FILTERS.containsKey(processor.getName()))
+		.forEach(processor -> text.set(processor.process(text.get())));
 
-		for(Filter aftFilter : AFT_FILTERS.values()){
-			if(aftFilter.should(supporter, text.get()))
-				text.set(aftFilter.filter(supporter, text.get()));
-		}
+		AFT_FILTERS.values().parallelStream()
+		.filter(fore -> fore.should(supporter, text.get()))
+		.forEach(fore -> fore.filter(supporter, text.get()));
 
-		filter = DEFAULT_FILTERS.get(GoogleIME.NAME);
+		Filter filter = null;
 		if((filter = DEFAULT_FILTERS.get(GoogleIME.NAME)).should(supporter, text.get()))
 			text.set(filter.filter(supporter, text.get()).replace(PlaceHolders.ORIGINAL, original));
 		else if((filter = DEFAULT_FILTERS.get(GoogleTranslate.NAME)).should(supporter, text.get()))
 			text.set(filter.filter(supporter, text.get()).replace(PlaceHolders.ORIGINAL, original));
 		else
-			text.set(supporter.getMessageFormat(MessageFormatType.NORMAL).replace(PlaceHolders.CONVERTED, text.get()));
+			text.set(filter.filter(supporter, text.get()).replace(PlaceHolders.ORIGINAL, original));
 
 		return applyFormat(supporter, playerName, text.get());
 	}
@@ -108,26 +108,25 @@ public class ProcessorManager {
 	public static TextComponent processAll(SupportTextProcessing supporter, String original){
 		AtomicReference<String> text = new AtomicReference<>(original);
 
-		Filter filter = DEFAULT_FILTERS.get(Coloring.NAME);
-		if(filter.should(supporter, text.get()))
-			text.set(filter.filter(supporter, text.get()));
+		Filter coloring = DEFAULT_FILTERS.get(Coloring.NAME);
+		if(coloring.should(supporter, text.get()))
+			text.set(coloring.filter(supporter, text.get()));
 
-		for(Filter foreFilter : FORE_FILTERS.values()){
-			if(foreFilter.should(supporter, text.get()))
-				text.set(foreFilter.filter(supporter, text.get()));
-		}
+		FORE_FILTERS.values().parallelStream()
+		.filter(fore -> fore.should(supporter, text.get()))
+		.forEach(fore -> fore.filter(supporter, text.get()));
 
-		for(Processor processor : supporter.getProcessors()){
-			if(!DEFAULT_FILTERS.containsKey(processor.getName()) && !FORE_FILTERS.containsKey(processor.getName()) && AFT_FILTERS.containsKey(processor.getName()))
-				text.set(processor.process(text.get()));
-		}
+		supporter.getProcessors().parallelStream()
+		.filter(processor -> !DEFAULT_FILTERS.containsKey(processor.getName()))
+		.filter(processor -> !FORE_FILTERS.containsKey(processor.getName()))
+		.filter(processor -> !AFT_FILTERS.containsKey(processor.getName()))
+		.forEach(processor -> text.set(processor.process(text.get())));
 
-		for(Filter aftFilter : AFT_FILTERS.values()){
-			if(aftFilter.should(supporter, text.get()))
-				text.set(aftFilter.filter(supporter, text.get()));
-		}
+		AFT_FILTERS.values().parallelStream()
+		.filter(fore -> fore.should(supporter, text.get()))
+		.forEach(fore -> fore.filter(supporter, text.get()));
 
-		filter = DEFAULT_FILTERS.get(GoogleIME.NAME);
+		Filter filter = DEFAULT_FILTERS.get(GoogleIME.NAME);
 		if(((GoogleIMEFilter) (filter = DEFAULT_FILTERS.get(GoogleIME.NAME))).should(supporter, text.get()))
 			text.set(((GoogleIMEFilter) filter).filter(supporter, text.get()));
 		else if((filter = DEFAULT_FILTERS.get(GoogleTranslate.NAME)).should(supporter, text.get()))
@@ -139,26 +138,25 @@ public class ProcessorManager {
 	public static TextComponent processAll(SupportTextProcessing supporter, String senderName, String receiverName, String original){
 		AtomicReference<String> text = new AtomicReference<>(original);
 
-		Filter filter = DEFAULT_FILTERS.get(Coloring.NAME);
-		if(filter.should(supporter, text.get()))
-			text.set(filter.filter(supporter, text.get()));
+		Filter coloring = DEFAULT_FILTERS.get(Coloring.NAME);
+		if(coloring.should(supporter, text.get()))
+			text.set(coloring.filter(supporter, text.get()));
 
-		for(Filter foreFilter : FORE_FILTERS.values()){
-			if(foreFilter.should(supporter, text.get()))
-				text.set(foreFilter.filter(supporter, text.get()));
-		}
+		FORE_FILTERS.values().parallelStream()
+		.filter(fore -> fore.should(supporter, text.get()))
+		.forEach(fore -> fore.filter(supporter, text.get()));
 
-		for(Processor processor : supporter.getProcessors()){
-			if(!DEFAULT_FILTERS.containsKey(processor.getName()) && !FORE_FILTERS.containsKey(processor.getName()) && AFT_FILTERS.containsKey(processor.getName()))
-				text.set(processor.process(text.get()));
-		}
+		supporter.getProcessors().parallelStream()
+		.filter(processor -> !DEFAULT_FILTERS.containsKey(processor.getName()))
+		.filter(processor -> !FORE_FILTERS.containsKey(processor.getName()))
+		.filter(processor -> !AFT_FILTERS.containsKey(processor.getName()))
+		.forEach(processor -> text.set(processor.process(text.get())));
 
-		for(Filter aftFilter : AFT_FILTERS.values()){
-			if(aftFilter.should(supporter, text.get()))
-				text.set(aftFilter.filter(supporter, text.get()));
-		}
+		AFT_FILTERS.values().parallelStream()
+		.filter(fore -> fore.should(supporter, text.get()))
+		.forEach(fore -> fore.filter(supporter, text.get()));
 
-		filter = DEFAULT_FILTERS.get(GoogleIME.NAME);
+		Filter filter = DEFAULT_FILTERS.get(GoogleIME.NAME);
 		if(((GoogleIMEFilter) (filter = DEFAULT_FILTERS.get(GoogleIME.NAME))).should(supporter, text.get()))
 			text.set(((GoogleIMEFilter) filter).filter(supporter, text.get()));
 		else if((filter = DEFAULT_FILTERS.get(GoogleTranslate.NAME)).should(supporter, text.get()))
@@ -269,22 +267,17 @@ public class ProcessorManager {
 	}
 
 	public static Set<Processor> fromProcessorNames(Collection<String> processorNames){
-		Set<Processor> processors = new HashSet<>();
-		for(String processorName : processorNames){
-			Processor processor = getProcessor(processorName);
-			if(processor != null)
-				processors.add(processor);
-		}
-		return processors;
+		return processorNames.parallelStream()
+		.map(ProcessorManager::getProcessor)
+		.filter(Optional::isPresent)
+		.map(Optional::get)
+		.collect(Collectors.toSet());
 	}
 
 	public static Set<String> toProcessorNames(Collection<Processor> processors){
-		Set<String> processorNames = new HashSet<>();
-		for(Processor processor : processors){
-			if(PROCESSORS.containsKey(processor.getName()))
-				processorNames.add(processor.getName());
-		}
-		return processorNames;
+		return processors.parallelStream()
+				.map(Processor::getName)
+				.collect(Collectors.toSet());
 	}
 
 	public static class PlaceHolders {

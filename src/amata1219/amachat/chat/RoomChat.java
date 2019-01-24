@@ -3,6 +3,7 @@ package amata1219.amachat.chat;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,8 +21,6 @@ public class RoomChat extends Chat {
 	public static final String NAME = "RoomChat";
 
 	protected UUID owner;
-	protected Set<UUID> invitees = new HashSet<>();
-	protected String inviteMessage;
 
 	protected RoomChat(final long id){
 		this.id = id;
@@ -33,7 +32,6 @@ public class RoomChat extends Chat {
 		(chat.config = Config.load(new File(Chat.DIRECTORY, "room.yml"), "chat.yml")).reload();
 
 		chat.owner = owner;
-		chat.invitees = guests;
 
 		return chat;
 	}
@@ -54,20 +52,19 @@ public class RoomChat extends Chat {
 			return;
 
 		super.reload();
-
-		config.reload();
-		Configuration configuration = config.getConfiguration();
-		inviteMessage = configuration.getString("InviteMessage");
 	}
 
 	@Override
 	public void chat(User user, String message){
 		UUID uuid = user.getUniqueId();
 
-		Chat match = PrefixManager.matchChat(message);
-		if(match != null && match != this && match.isJoin(uuid)){
-			match.chat(user, PrefixManager.removePrefix((Prefix) match, message));
-			return;
+		Optional<Prefix> matched = PrefixManager.matchChat(message);
+		if(matched.isPresent()){
+			Prefix prefix = matched.get();
+			if(prefix.isJoin(uuid) && !prefix.equals(this)){
+				matched.get().chat(user, PrefixManager.removePrefix(matched.get(), message));
+				return;
+			}
 		}
 
 		ChatEvent event = ChatEvent.call(this, user, message);
@@ -96,9 +93,6 @@ public class RoomChat extends Chat {
 
 		if(bannedUsers.contains(uuid))
 			return "§cこのチャットには参加出来ません。";
-
-		if(!invitees.contains(uuid))
-			return "§cこのチャットに招待されていません。";
 
 		users.add(uuid);
 		ChatManager.sendMessage(uuid, joinMessage, false);
@@ -157,27 +151,6 @@ public class RoomChat extends Chat {
 
 	public boolean isInvalid(){
 		return users.isEmpty();
-	}
-
-	public Set<UUID> getInvitees(){
-		return invitees;
-	}
-
-	public boolean isInvited(UUID uuid){
-		return invitees.contains(uuid);
-	}
-
-	public void tryInvite(UUID uuid){
-		addInvitee(uuid);
-		ChatManager.sendMessage(uuid, inviteMessage, false);
-	}
-
-	public void addInvitee(UUID uuid){
-		invitees.add(uuid);
-	}
-
-	public void removeInvitee(UUID uuid){
-		invitees.remove(uuid);
 	}
 
 }

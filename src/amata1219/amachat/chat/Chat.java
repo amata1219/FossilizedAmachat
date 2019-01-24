@@ -3,6 +3,7 @@ package amata1219.amachat.chat;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -62,7 +63,7 @@ public abstract class Chat implements SupportTextProcessing {
 		config.set("MutedUsers", mutedUsers);
 		config.set("BannedUsers", bannedUsers);
 		config.set("Expires", null);
-		expires.forEach((uuid, time) -> configuration.set("Expires." + uuid.toString(), time.longValue()));
+		expires.entrySet().parallelStream().forEach(entry -> configuration.set("Expires." + entry.getKey().toString(), entry.getValue().longValue()));
 
 		config.apply();
 	}
@@ -90,7 +91,7 @@ public abstract class Chat implements SupportTextProcessing {
 		mutedUsers = config.getUniqueIdSet("MutedUsers");
 		bannedUsers = config.getUniqueIdSet("BannedUsers");
 		expires.clear();
-		configuration.getSection("Expires").getKeys().forEach(uuid -> expires.put(UUID.fromString(uuid), configuration.getLong("Expires." + uuid)));
+		configuration.getSection("Expires").getKeys().parallelStream().forEach(uuid -> expires.put(UUID.fromString(uuid), configuration.getLong("Expires." + uuid)));
 	}
 
 	public void chat(User user, String message){
@@ -99,10 +100,13 @@ public abstract class Chat implements SupportTextProcessing {
 
 		UUID uuid = user.getUniqueId();
 
-		Chat match = PrefixManager.matchChat(message);
-		if(match != null && match != this && match.isJoin(uuid)){
-			match.chat(user, PrefixManager.removePrefix((Prefix) match, message));
-			return;
+		Optional<Prefix> matched = PrefixManager.matchChat(message);
+		if(matched.isPresent()){
+			Prefix prefix = matched.get();
+			if(prefix.isJoin(uuid) && !prefix.equals(this)){
+				matched.get().chat(user, PrefixManager.removePrefix(matched.get(), message));
+				return;
+			}
 		}
 
 		if(isMuted(uuid)){

@@ -1,5 +1,7 @@
 package amata1219.amachat.command;
 
+import java.util.Optional;
+
 import com.google.common.collect.ImmutableMap;
 
 import amata1219.amachat.Util;
@@ -37,12 +39,12 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 
 	public abstract void complete(CommandSender sender, String[] args);
 
-	public static User isUser(CommandSender sender){
+	public static Optional<User> isUser(CommandSender sender){
 		if(sender instanceof ProxiedPlayer)
 			return UserManager.getUser(((ProxiedPlayer) sender).getUniqueId());
 
 		sender.sendMessage(Util.toTextComponent(ChatColor.RED + "ゲーム内から実行して下さい。"));
-		return null;
+		return Optional.empty();
 	}
 
 	public static class Arguments {
@@ -87,48 +89,22 @@ public abstract class Command extends net.md_5.bungee.api.plugin.Command {
 			return getArgument(index).hashCode();
 		}
 
-		public Result<Long> getNumberResult(int index){
+		public Optional<Long> getNumberResult(int index){
 			String argument = getArgument(index);
 			for(int i = 0; i < argument.length(); i++){
-				if(!Character.isDigit(argument.charAt(i))){
-					return new Result<Long>(Long.valueOf(-1), true);
-				}
+				if(!Character.isDigit(argument.charAt(i)))
+					return Optional.empty();
 			}
-			return new Result<Long>(Long.valueOf(argument));
+			return Optional.ofNullable(Long.valueOf(argument));
 		}
 
-		public Chat getChat(int index){
-			return ChatManager.getChat(getArgument(index));
+		public Optional<Chat> getChat(int index){
+			return ChatManager.matchedChat(getArgument(index));
 		}
 
 		public Chat getChat(int index, User user){
-			Chat chat = getChat(index);
-			return chat == null ? user.getDestination() : chat;
-		}
-
-	}
-
-	public static class Result<T> {
-
-		public final T result;
-		public final boolean invalid;
-
-		public Result(T result){
-			this.result = result;
-			this.invalid = false;
-		}
-
-		public Result(T result, boolean invalid){
-			this.result = result;
-			this.invalid = invalid;
-		}
-
-		public T getResult(){
-			return result;
-		}
-
-		public boolean isInvalid(){
-			return invalid;
+			Optional<Chat> chat = getChat(index);
+			return chat.isPresent() ? chat.get() : user.getDestination();
 		}
 
 	}

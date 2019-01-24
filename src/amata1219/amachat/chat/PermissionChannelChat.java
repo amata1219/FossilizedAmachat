@@ -1,6 +1,7 @@
 package amata1219.amachat.chat;
 
 import java.io.File;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -79,10 +80,13 @@ public class PermissionChannelChat extends ChannelChat implements Permission {
 
 		UUID uuid = user.getUniqueId();
 
-		Chat match = PrefixManager.matchChat(message);
-		if(match != null && match != this && match.isJoin(uuid)){
-			match.chat(user, PrefixManager.removePrefix((Prefix) match, message));
-			return;
+		Optional<Prefix> matched = PrefixManager.matchChat(message);
+		if(matched.isPresent()){
+			Prefix prefix = matched.get();
+			if(prefix.isJoin(uuid) && !prefix.equals(this)){
+				matched.get().chat(user, PrefixManager.removePrefix(matched.get(), message));
+				return;
+			}
 		}
 
 		if(isMuted(uuid)){

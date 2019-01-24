@@ -1,6 +1,5 @@
 package amata1219.amachat.command;
 
-import amata1219.amachat.user.User;
 import net.md_5.bungee.api.CommandSender;
 
 public class BroadcastCommand extends Command {
@@ -20,16 +19,14 @@ public class BroadcastCommand extends Command {
 
 	@Override
 	public void execute(CommandSender sender, String[] args) {
-		User user = Command.isUser(sender);
-		if(user == null)
-			return;
+		Command.isUser(sender).ifPresent(user -> {
+			Arguments arguments = Arguments.newInstance(args);
+			if(!arguments.hasArgument(0)){
+				user.warn("メッセージを入力して下さい。");
+				return;
+			}
 
-		Arguments arguments = Arguments.newInstance(args);
-		if(!arguments.hasArgument(0)){
-			user.warn("メッセージを入力して下さい。");
-			return;
-		}
-
-		user.getDestination().broadcast(arguments.concatenateArguments(0, arguments.getLastIndex()));
+			user.getDestination().broadcast(arguments.concatenateArguments(0, arguments.getLastIndex()));
+		});
 	}
 }

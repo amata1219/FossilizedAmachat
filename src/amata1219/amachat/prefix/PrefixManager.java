@@ -1,41 +1,32 @@
 package amata1219.amachat.prefix;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class PrefixManager {
 
-	private static final Set<Prefix> PREFIXES = new HashSet<>();
+	private static final Map<Long, Prefix> PREFIXES = new HashMap<>();
 
 	private PrefixManager(){
 
 	}
 
-	public static Set<Prefix> getPrefixes(){
-		return PREFIXES;
+	public static Collection<Prefix> getPrefixes(){
+		return PREFIXES.values();
 	}
 
-	public static void addPrefix(Prefix prefix){
-		/*if(!(prefix instanceof Chat))
-			new UnsupportedOperationException("Is not an instance of a sub class that extends amata1219.amachat.chat.Chat");*/
-
-		PREFIXES.add(prefix);
+	public static void registerPrefix(Prefix prefix){
+		PREFIXES.put(prefix.getId(), prefix);
 	}
 
-	public static void removePrefix(Prefix prefix){
-		PREFIXES.remove(prefix);
+	public static void unregisterPrefix(long id){
+		PREFIXES.remove(id);
 	}
 
-	public static Prefix matchChat(String message){
-		int length = message.length();
-
-		for(Prefix prefix : PREFIXES){
-			String s = prefix.getPrefix();
-			if(length > s.length() && message.startsWith(s))
-				return prefix;
-		}
-
-		return null;
+	public static Optional<Prefix> matchChat(String message){
+		return PREFIXES.values().parallelStream().filter(prefix -> message.startsWith(prefix.getPrefix())).findFirst();
 	}
 
 	public static String removePrefix(Prefix prefix, String message){
